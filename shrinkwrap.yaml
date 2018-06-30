@@ -26,6 +26,7 @@ dependencies:
   leaflet-tilelayer-colorpicker: 0.1.0
   leaflet.elevation: 0.0.3
   lodash-es: 4.17.10
+  mini-css-extract-plugin: 0.4.1
   morgan: 1.9.0
   mt-latlon: 0.1.1
   offline-plugin: 5.0.5
@@ -183,6 +184,21 @@ packages:
     dev: false
     resolution:
       integrity: sha512-XF9RTeckFgDyl196uRKZWHFFfbkzsMK96QTXp+TC0R9gsV9DMiDGMSIllgy/WdrZ3y3dsQp4fTA5r4GoaOBchA==
+  /@webpack-contrib/schema-utils/1.0.0-beta.0:
+    dependencies:
+      ajv: 6.5.1
+      ajv-keywords: /ajv-keywords/3.2.0/ajv@6.5.1
+      chalk: 2.4.1
+      strip-ansi: 4.0.0
+      text-table: 0.2.0
+      webpack-log: 1.2.0
+    dev: false
+    engines:
+      node: '>= 6.9.0 || >= 8.9.0'
+    peerDependencies:
+      webpack: ^3.0.0 || ^4.0.0
+    resolution:
+      integrity: sha512-LonryJP+FxQQHsjGBi6W786TQB1Oym+agTpY0c+Kj8alnIw+DLUJb6SI8Y1GHGhLCH1yPRrucjObUmxNICQ1pg==
   /JSV/4.0.2:
     dev: false
     resolution:
@@ -4455,6 +4471,18 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-3z02Uqc/3ta5sLJBRub9BSNTRY4=
+  /mini-css-extract-plugin/0.4.1:
+    dependencies:
+      '@webpack-contrib/schema-utils': 1.0.0-beta.0
+      loader-utils: 1.1.0
+      webpack-sources: 1.1.0
+    dev: false
+    engines:
+      node: '>= 6.9.0 <7.0.0 || >= 8.9.0'
+    peerDependencies:
+      webpack: ^4.4.0
+    resolution:
+      integrity: sha512-XWuB3G61Rtasq/gLe7cp5cuozehE6hN+E4sxCamRR/WDiHTg+f7ZIAS024r8UJQffY+e2gGELXQZgQoFDfNDCg==
   /minimalistic-assert/1.0.1:
     dev: false
     resolution:
@@ -6774,6 +6802,10 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-IFLM5wp3QrJODQFPm6/to3LJZrONdBY/otxcvDIQzu217zKye6yVR3hhi9lAjrC2Z+m/j5oDxMPb1qcd8cIvpA==
+  /text-table/0.2.0:
+    dev: false
+    resolution:
+      integrity: sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
   /through/2.3.8:
     dev: false
     resolution:
@@ -7618,6 +7650,7 @@ specifiers:
   leaflet-tilelayer-colorpicker: ^0.1.0
   leaflet.elevation: 0.0.3
   lodash-es: ^4.17.10
+  mini-css-extract-plugin: ^0.4.1
   morgan: ^1.9.0
   mt-latlon: ^0.1.1
   offline-plugin: ^5.0.5

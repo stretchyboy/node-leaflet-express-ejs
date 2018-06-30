@@ -26,6 +26,7 @@ app.get('/about', function(req, res) {
 
 
 app.use(express.static('dist'))
+//app.use("/distfonts",express.static('dist/fonts'))
 
 
 // Get port from environment and store in Express
