@@ -28,7 +28,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
             options: {
               // you can specify a publicPath here
               // by default it use publicPath in webpackOptions.output
-              outputPath: "dist",
+              outputPath: "~/dist/",
               publicPath: '/'
             }
           },
@@ -49,7 +49,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
              loader: 'file-loader',
             options: {
                // name: '[name].[ext]',
-               outputPath: "dist/",
+               outputPath: "~/dist/",
               publicPath: '/'
             }
            }
@@ -61,7 +61,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
                     loader: 'file-loader',
                     options: {
                        // name: '[name].[ext]',
-                        outputPath: 'dist/fonts/',
+                        outputPath: '~/dist/fonts/',
                       publicPath: '/fonts/'
                     }
                 }]

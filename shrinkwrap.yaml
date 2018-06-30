@@ -19,6 +19,7 @@ dependencies:
   html-webpack-plugin: 3.2.0
   jquery: 3.3.1
   leaflet: 1.3.1
+  leaflet-fontawesome-markers: 0.0.5
   leaflet-geometryutil: 0.9.0
   leaflet-hotline: 0.4.0
   leaflet-openweathermap: github.com/buche/leaflet-openweathermap/faee664e2ed81e53e650799fc495069262ed628b
@@ -3900,6 +3901,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-MIrMr6C8SDo4Z7S28rlQYlHRuDU=
+  /leaflet-fontawesome-markers/0.0.5:
+    dev: false
+    resolution:
+      integrity: sha1-zA6lbqQZ5zc9r4mgGTjrcS8RdrY=
   /leaflet-geometryutil/0.9.0:
     dependencies:
       leaflet: 1.3.1
@@ -7650,6 +7655,7 @@ specifiers:
   html-webpack-plugin: ^3.2.0
   jquery: ^3.3.1
   leaflet: ^1.3.1
+  leaflet-fontawesome-markers: ^0.0.5
   leaflet-geometryutil: ^0.9.0
   leaflet-hotline: ^0.4.0
   leaflet-openweathermap: 'git+https://github.com/buche/leaflet-openweathermap.git'

@@ -10,14 +10,18 @@ import "leaflet-search"; //The place search
 import "leaflet-openweathermap";
 import "leaflet-tilelayer-colorpicker";
 import 'leaflet-sidebar-v2';
+import "Leaflet.MultiOptionsPolyline";
+import "leaflet-fontawesome-markers";
 
 // TODO : Move to full screen map?
 
 import "font-awesome/css/font-awesome.css";
-import "bootstrap/dist/css/bootstrap.css";
+//import "bootstrap/dist/css/bootstrap.css";
 import "leaflet/dist/leaflet.css";
 import "leaflet-search/dist/leaflet-search.min.css";
 import "leaflet-sidebar-v2/css/leaflet-sidebar.css";
+import "leaflet-fontawesome-markers/L.Icon.FontAwesome.css";
+
 
 import PouchDB from "pouchdb";
 import PouchAuth from "pouchdb-authentication";
@@ -58,9 +62,6 @@ db.logIn('batman', 'brucewayne', function (err, response) {
   }
 });
 
-
-
-
 //https://jjwtay.github.io/Leaflet.draw-box/ target box  drawing
 // locate me https://www.npmjs.com/package/leaflet.locatecontrol
 // geo search
@@ -89,7 +90,7 @@ function getDirectionalLine(target, angle, distance) {
   return latlngs;
 }
 
-var map = L.map('map').setView([53.3494, -1.5664], 13);
+var map = L.map('map').setView([53.3494, -1.5664], 11);
 
 //Add the address search 
 map.addControl( new L.Control.Search({
@@ -103,23 +104,6 @@ map.addControl( new L.Control.Search({
 		autoType: false,
 		minLength: 2
   }) );
-
-// TODO : make target a singleton marker which can be moved / replaced on a search
-var target = [53.3797, -1.4744];
-
-// TODO : Drawsunset as well
-var times = SunCalc.getTimes(new Date(), target[0], target[1]);
-var sunrisePos = SunCalc.getPosition(times.sunrise, target[0], target[1]);
-// get sunrise azimuth in degrees
-var sunriseAngle = sunrisePos.azimuth * 180 / Math.PI;
-var aLine = getDirectionalLine(target, sunriseAngle, 10, "red");
-
-var polyline = L.polyline(aLine, {
-  color: 'red'
-}).addTo(map);
-
-// TODO : put all this info in the sidebar
-console.log("times.sunrise", times.sunrise, "sunrisePos", sunrisePos, "sunriseAngle", sunriseAngle);
 
 
 function getHeightAtPoint(point, RGBLayer){
@@ -154,7 +138,7 @@ var baseMaps = { "Height Map":RGB_Terrain};
 var overlayMaps = {"OSM Mapnik": OpenStreetMap_Mapnik , "Clouds": clouds, "Wind":wind, "Rain":rain, "Temp":temp};
 var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-
+var oLineLayer = L.layerGroup().addTo(map);
 
 var sidebar = L.control.sidebar({
     autopan: true,       // whether to maintain the centered map point when opening the sidebar
@@ -163,55 +147,127 @@ var sidebar = L.control.sidebar({
     position: 'left',     // left or right
 }).addTo(map);
 
-
-
-
 function getPointsOnLine(map, aLine, steps){
   var aList = [];
   for (var i=0; i<=steps; i++){
     var P1 = GeometryUtil.interpolateOnLine(map, aLine, i*(1/steps));
-    //console.log("P1", P1);
-    //L.marker(P1.latLng).addTo(map);
-    aList.push(P1);
+    aList.push(P1.latLng);
   }
   return aList;
 }
 
-// TODO : Draw graph or a heatline indicating where you should be able to see the target from
-var aPoints =  getPointsOnLine(map, aLine, 100);
-
-// TODO : Change day
-// TODO : save plans
-// TODO : scan along thesunset line etc. for it crossing a road where the veiw should be good 
-// TODO : Get google streetview of that point in the right direction
-
-// TODO : Login/ Register
-// TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
-// TODO : Droneflight safety data
-// TODO : Flightplanning
-// TODO : Light condition timings (nautical twilight etc.)
-
-// TODO : Offline first flight/shootoinig plan data (and map flight safety data storage ??)
-// TODO : pouchdb and couchdb
-
-// TODO : Site reece recording
-
-// TODO : Will in work on phone / tablet
-// TODO : cordova if it will
 
 
-function getHeights(){
-  console.log("aPoints",aPoints);
-  var aLatLngs = [];
-  var heights = [];
+var iDistance = 10;
+var iSteps = 100;
+
+var drawLine = function(Target){
+  oLineLayer.clearLayers();
   
-  for (var i=0; i<aPoints.length; i++){
-    aLatLngs[i]=[aPoints[i].latLng.lat, aPoints[i].latLng.lng];
-    aLatLngs[i].push(getHeightAtPoint(new L.LatLng(aPoints[i].latLng.lat, aPoints[i].latLng.lng) ,RGB_Terrain, true));
-    //console.log("aLatLngs[i]", aLatLngs[i]);
-    heights.push(aLatLngs[i][2]);
-  }
-  console.log("heights",heights);
+  var target = [Target.lat, Target.lng];
+  // TODO : Drawsunset as well
+  var times = SunCalc.getTimes(new Date(), target[0], target[1]);
+  var sunrisePos = SunCalc.getPosition(times.sunrise, target[0], target[1]);
+  // get sunrise azimuth in degrees
+  var sunriseAngle = sunrisePos.azimuth * 180 / Math.PI;
+  var aLine = getDirectionalLine(target, sunriseAngle, iDistance, "red");
+
+  // TODO : put all this info in the sidebar
+  console.log("times.sunrise", times.sunrise, "sunrisePos", sunrisePos, "sunriseAngle", sunriseAngle);
+
+  // TODO : Draw graph or a heatline indicating where you should be able to see the target from
+  var aPoints =  getPointsOnLine(map, aLine, iSteps);
+
+  // TODO : Change day
+  // TODO : save plans
+  // TODO : scan along thesunset line etc. for it crossing a road where the veiw should be good 
+  // TODO : Get google streetview of that point in the right direction
+
+  // TODO : Login/ Register
+  // TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
+  // TODO : Droneflight safety data
+  // TODO : Flightplanning
+  // TODO : Light condition timings (nautical twilight etc.)
+
+  // TODO : Offline first flight/shootoinig plan data (and map flight safety data storage ??)
+  // TODO : pouchdb and couchdb
+
+  // TODO : Site reece recording
+
+  // TODO : Will in work on phone / tablet
+  // TODO : cordova if it will
+
+  var fAngle = 0;
+  var iTargetAlt = null;
+  var iStepDist = 1000 * (iDistance/iSteps);
+    //SOHCAHTOA
+  aPoints = aPoints.map(function(latLng, i){
+    latLng.alt = getHeightAtPoint(latLng, RGB_Terrain, true);
+    if(iTargetAlt == null){
+      fAngle = 0;
+      iTargetAlt = latLng.alt;
+    } else {
+      var iHeight = latLng.alt - iTargetAlt;
+      var iDist = i*iStepDist
+      fAngle = Math.atan(iHeight/iDist);
+    }
+
+    latLng.fAngle = fAngle;
+
+    return latLng;
+  });
+  
+  //console.log("aPoints", aPoints);
+
+  var fMaxAngle = 0;
+  
+  L.multiOptionsPolyline(aPoints, {
+    multiOptions: {
+        optionIdxFn: function (latLng) {
+            var iColor = 0;
+            if(latLng.fAngle == fMaxAngle){
+              iColor = 1;
+            } else if(latLng.fAngle > fMaxAngle){
+              iColor = 2;
+              fMaxAngle = latLng.fAngle ;
+            }
+            //console.log(iColor);
+            return iColor;
+        },
+        options: [
+            {color: '#FF0000AA'}, {color: '#0000FFAA'}, {color: '#00FF00AA'}]
+    },
+    weight: 5,
+    lineCap: 'butt',
+    opacity: 0.75,
+    smoothFactor: 1}).addTo(oLineLayer);
   
 }
-setTimeout(getHeights, 10000);
+
+
+
+// TODO : make target a singleton marker which can be moved / replaced on a search
+
+setTimeout(function(){
+  var target = [53.3797, -1.4744];
+//var oTarget = L.marker(target).addTo(map);
+  
+  var oTarget = L.marker(target, {
+    draggable:true,
+    icon: L.icon.fontAwesome({ 
+        iconClasses: 'fa fa-info-circle', // you _could_ add other icon classes, not tested.
+        markerColor: '#00a9ce',
+        iconColor: '#FFF'
+    })
+}).addTo(map);
+  
+  
+oTarget.on("move", function(evt){
+  console.log("moved", evt);
+  drawLine(evt.latlng);
+});
+  
+oTarget.setLatLng(target);
+}, 10000);
+
+//setTimeout(function(){drawLine(target)}, 10000);
