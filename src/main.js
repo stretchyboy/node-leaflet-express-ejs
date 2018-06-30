@@ -13,7 +13,7 @@ import 'leaflet-sidebar-v2';
 import "Leaflet.MultiOptionsPolyline";
 import "leaflet-fontawesome-markers";
 
-// TODO : Move to full screen map?
+// DONE : Move to full screen map?
 
 import "font-awesome/css/font-awesome.css";
 //import "bootstrap/dist/css/bootstrap.css";
@@ -69,13 +69,36 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 //elevation inspiration  https://www.solwise.co.uk/wireless-elevationtool.html
 // sun calc http://suncalc.net/
 
-//TODO : find area
-//TODO : draw box or segment / select point
-//TODO: get elevations
-// TODO : find sectors you can see from
-// TODO : thind road / parks you should be able to see from
+// Done : find area
+// TODO : find area resets yjr marker to the centre of new area
+// DONE : select point
+// DONE : get elevations
+// DONE : find sectors you can see from
+// TODO : find road / parks you should be able to see from
 // TODO : get google street maps images in that direction
+// TODO : Change day
+// TODO : save plans
+// TODO : scan along thesunset line etc. for it crossing a road where the veiw should be good 
+// TODO : OR use overpass api on a thin triangle 
+// TODO : Triangles representing narrowest (lense focal lenght and DSLR/ SLR/full format choosen from lists)
+// TODO : FOV from the start & end of green sections (done ith same colouring)
+// TODO : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
 
+// TODO : Get google streetview of that point in the right direction
+
+// TODO : Login/ Register
+// TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
+// TODO : Droneflight safety data
+// TODO : Flightplanning
+// DONE : Light condition timings (nautical twilight etc.)
+
+// TODO : Offline first flight/shootoinig plan data (and map flight safety data storage ??)
+// TODO : pouchdb and couchdb
+
+// TODO : Site reece recording
+
+// TODO : Will in work on phone / tablet
+// TODO : cordova if it will
 
 
 function getDirectionalLine(target, angle, distance) {
@@ -161,41 +184,27 @@ function getPointsOnLine(map, aLine, steps){
 var iDistance = 10;
 var iSteps = 100;
 
-var drawLine = function(Target){
+var drawLine = function(Target, sTimeType){
+  //nsole.log(Target, sTimeType);
   oLineLayer.clearLayers();
-  
+  //var sTimeType = "sunrise";
   var target = [Target.lat, Target.lng];
   // TODO : Drawsunset as well
   var times = SunCalc.getTimes(new Date(), target[0], target[1]);
-  var sunrisePos = SunCalc.getPosition(times.sunrise, target[0], target[1]);
+  //nsole.log("times", times);
+  jQuery("#time").html(times[sTimeType].toLocaleTimeString());
+  var oPos = SunCalc.getPosition(times[sTimeType], target[0], target[1]);
   // get sunrise azimuth in degrees
-  var sunriseAngle = sunrisePos.azimuth * 180 / Math.PI;
-  var aLine = getDirectionalLine(target, sunriseAngle, iDistance, "red");
+  var fSubAngle = oPos.azimuth * 180 / Math.PI;
+  var aLine = getDirectionalLine(target, fSubAngle, iDistance, "red");
 
   // TODO : put all this info in the sidebar
-  console.log("times.sunrise", times.sunrise, "sunrisePos", sunrisePos, "sunriseAngle", sunriseAngle);
+  //nsole.log("times."+sTimeType, times[sTimeType], "oPos", oPos, "fSubAngle", fSubAngle);
 
-  // TODO : Draw graph or a heatline indicating where you should be able to see the target from
+  // DONE : Draw graph or a heatline indicating where you should be able to see the target from
   var aPoints =  getPointsOnLine(map, aLine, iSteps);
 
-  // TODO : Change day
-  // TODO : save plans
-  // TODO : scan along thesunset line etc. for it crossing a road where the veiw should be good 
-  // TODO : Get google streetview of that point in the right direction
-
-  // TODO : Login/ Register
-  // TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
-  // TODO : Droneflight safety data
-  // TODO : Flightplanning
-  // TODO : Light condition timings (nautical twilight etc.)
-
-  // TODO : Offline first flight/shootoinig plan data (and map flight safety data storage ??)
-  // TODO : pouchdb and couchdb
-
-  // TODO : Site reece recording
-
-  // TODO : Will in work on phone / tablet
-  // TODO : cordova if it will
+  
 
   var fAngle = 0;
   var iTargetAlt = null;
@@ -241,33 +250,45 @@ var drawLine = function(Target){
     lineCap: 'butt',
     opacity: 0.75,
     smoothFactor: 1}).addTo(oLineLayer);
+/* var oEnd = L.marker(aPoints[iSteps], {
+    draggable:true,
+    icon: L.icon.fontAwesome({ 
+        iconClasses: 'fa fa-sun-solid', // you _could_ add other icon classes, not tested.
+        markerColor: 'darkgray',
+        iconColor: 'yellow'
+    })
+}).addTo(oLineLayer);*/
+  
   
 }
 
 
 
 // TODO : make target a singleton marker which can be moved / replaced on a search
-
+var target = [53.3797, -1.4744];
 setTimeout(function(){
-  var target = [53.3797, -1.4744];
+  target = [53.3797, -1.4744];
 //var oTarget = L.marker(target).addTo(map);
   
   var oTarget = L.marker(target, {
     draggable:true,
     icon: L.icon.fontAwesome({ 
-        iconClasses: 'fa fa-info-circle', // you _could_ add other icon classes, not tested.
+        iconClasses: 'fa fa-camera', // you _could_ add other icon classes, not tested.
         markerColor: '#00a9ce',
         iconColor: '#FFF'
     })
-}).addTo(map);
-  
-  
-oTarget.on("move", function(evt){
-  console.log("moved", evt);
-  drawLine(evt.latlng);
-});
-  
-oTarget.setLatLng(target);
+  }).addTo(map);
+
+
+  oTarget.on("move", function(evt){
+    target = evt.latlng;
+    drawLine(target, jQuery("#timetype").val());
+  });
+
+  oTarget.setLatLng(target);
 }, 10000);
 
+jQuery("#timetype").on("change",function(evt){
+  drawLine(target, jQuery("#timetype").val());
+});
 //setTimeout(function(){drawLine(target)}, 10000);
