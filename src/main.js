@@ -14,7 +14,7 @@ import 'leaflet-sidebar-v2';
 // TODO : Move to full screen map?
 
 import "font-awesome/css/font-awesome.css";
-//import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap/dist/css/bootstrap.css";
 import "leaflet/dist/leaflet.css";
 import "leaflet-search/dist/leaflet-search.min.css";
 import "leaflet-sidebar-v2/css/leaflet-sidebar.css";

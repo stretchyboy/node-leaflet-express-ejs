@@ -10,38 +10,17 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
       path: path.resolve(__dirname, 'dist')
     },
     plugins: [
+      new HardSourceWebpackPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
         filename: "[name].css",
         chunkFilename: "[id].css"
-      }),
-      new HardSourceWebpackPlugin()
+      })
   ],
    module: {
      rules: [
-       /*{
-         test: /\.css$/,
-         use: [
-           'style-loader',
-           'css-loader'
-         ]
-       },*/
-        
-          {
-         test: /\.(png|svg|jpg|gif)$/,
-         use: [
-           {
-             loader: 'file-loader',
-           options: {
-              //name: '[path][name].[ext]',
-              outputPath: 'dist/',
-              publicPath: 'dist/'
-            }
-           }
-         ]
-       },
-       {
+        {
         test: /\.css$/,
         use: [
           {
@@ -49,20 +28,41 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
             options: {
               // you can specify a publicPath here
               // by default it use publicPath in webpackOptions.output
-              publicPath: 'dist/'
+              outputPath: "dist",
+              publicPath: '/'
             }
           },
           "css-loader"
         ]
       },
+       /*{
+         test: /\.css$/,
+         use: [
+           'style-loader',
+           'css-loader'
+         ]
+       },*/
+          {
+         test: /\.(png|svg|jpg|gif)$/,
+         use: [
+           {
+             loader: 'file-loader',
+            options: {
+               // name: '[name].[ext]',
+               outputPath: "dist/",
+              publicPath: '/'
+            }
+           }
+         ]
+       },
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
                 use: [{
                     loader: 'file-loader',
                     options: {
-                        name: '[name].[ext]',
-                        outputPath: 'fonts/',
-                      publicPath: 'fonts/'
+                       // name: '[name].[ext]',
+                        outputPath: 'dist/fonts/',
+                      publicPath: '/fonts/'
                     }
                 }]
             }
