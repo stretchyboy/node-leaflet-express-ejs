@@ -75,6 +75,8 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 // TODO : thind road / parks you should be able to see from
 // TODO : get google street maps images in that direction
 
+
+
 function getDirectionalLine(target, angle, distance) {
   // get position of the sun (azimuth and altitude) at today's sunrise
   var p1 = new LatLon(target[0], target[1]);
