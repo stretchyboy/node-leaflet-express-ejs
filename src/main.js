@@ -186,13 +186,18 @@ const VIEW_NONE = 0;
 const VIEW_POSS = 1;
 const VIEW_YES = 2;
 
-var drawLine = function(Target, sTimeType){
-  //nsole.log(Target, sTimeType);
+var drawLine = function(Target, sTimeType, sDate){
+  //console.log("drawLine", Target, sTimeType, sDate);
+  var oDate = new Date();
+  if(sDate){
+    oDate = new Date(sDate);
+  }
+  //console.log("oDate",oDate);
   oLineLayer.clearLayers();
   //var sTimeType = "sunrise";
   var target = [Target.lat, Target.lng];
   // TODO : Drawsunset as well
-  var times = SunCalc.getTimes(new Date(), target[0], target[1]);
+  var times = SunCalc.getTimes(oDate, target[0], target[1]);
   //nsole.log("times", times);
   jQuery("#time").html(times[sTimeType].toLocaleTimeString());
   var oPos = SunCalc.getPosition(times[sTimeType], target[0], target[1]);
@@ -244,7 +249,7 @@ var drawLine = function(Target, sTimeType){
     return latLng.ViewStatus == VIEW_YES;
   });
   
-  console.log("Possible Views", aViews);
+  //console.log("Possible Views", aViews);
   
   var aRequests = aViews.map(function(latLng){
     var oParams = {
@@ -315,7 +320,7 @@ var drawLine = function(Target, sTimeType){
   
 }
 
-
+jQuery("#timedate").val(new Date());
 
 // TODO : make target a singleton marker which can be moved / replaced on a search
 var target = [53.3797, -1.4744];
@@ -336,14 +341,18 @@ setTimeout(function(){
 
   oTarget.on("move", function(evt){
     target = evt.latlng;
-    drawLine(target, jQuery("#timetype").val());
+    drawLine(target, jQuery("#timetype").val(), jQuery("#timedate").val());
   });
 
   oTarget.setLatLng(target);
 }, 5000);
 
 jQuery("#timetype").on("change",function(evt){
-  drawLine(target, jQuery("#timetype").val());
+  drawLine(target, jQuery("#timetype").val(), jQuery("#timedate").val());
+});
+
+jQuery("#timedate").on("change",function(evt){
+  drawLine(target, jQuery("#timetype").val(), jQuery("#timedate").val());
 });
 //setTimeout(function(){drawLine(target)}, 10000);
 
