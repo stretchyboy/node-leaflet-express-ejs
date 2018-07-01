@@ -75,7 +75,7 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 // DONE : get elevations
 // DONE : find sectors you can see from
 // DONE : find places there is a street view (road / parks) you should be able to see from
-// TODO : Change day
+// DONE : Change day
 // TODO : save plans
 // TODO : FOV from the start & end of green sections (done ith same colouring)
 // TODO : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
