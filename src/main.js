@@ -280,7 +280,10 @@ var drawLine = function(Target, sTimeType, sDate){
           }).bindPopup(L.popup({
             minWidth:400
           }).setContent(
-            "<img src=\""+sImg+"\" >"
+            '<a target="_blank" href="https://www.google.com/maps/@?api=1&map_action=pano&'
+            +jQuery.param(oTweaked)+'" >'+
+          
+            "<img src=\""+sImg+"\" ></a>"
           )).addTo(oLineLayer);
 
         }
