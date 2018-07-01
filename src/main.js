@@ -75,7 +75,6 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 // DONE : get elevations
 // DONE : find sectors you can see from
 // TODO : find road / parks you should be able to see from
-// TODO : get google street maps images in that direction
 // TODO : Change day
 // TODO : save plans
 // TODO : scan along thesunset line etc. for it crossing a road where the veiw should be good 
@@ -84,7 +83,7 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 // TODO : FOV from the start & end of green sections (done ith same colouring)
 // TODO : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
 
-// TODO : Get google streetview of that point in the right direction
+
 
 // TODO : Login/ Register
 // TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
@@ -183,6 +182,9 @@ function getPointsOnLine(map, aLine, steps){
 
 var iDistance = 10;
 var iSteps = 100;
+const VIEW_NONE = 0;
+const VIEW_POSS = 1;
+const VIEW_YES = 2;
 
 var drawLine = function(Target, sTimeType){
   //nsole.log(Target, sTimeType);
@@ -195,21 +197,21 @@ var drawLine = function(Target, sTimeType){
   jQuery("#time").html(times[sTimeType].toLocaleTimeString());
   var oPos = SunCalc.getPosition(times[sTimeType], target[0], target[1]);
   // get sunrise azimuth in degrees
-  var fSubAngle = oPos.azimuth * 180 / Math.PI;
-  var aLine = getDirectionalLine(target, fSubAngle, iDistance, "red");
+  var fSunAngle = oPos.azimuth * 180 / Math.PI;
+  var aLine = getDirectionalLine(target, fSunAngle, iDistance, "red");
 
   // TODO : put all this info in the sidebar
-  //nsole.log("times."+sTimeType, times[sTimeType], "oPos", oPos, "fSubAngle", fSubAngle);
+  //nsole.log("times."+sTimeType, times[sTimeType], "oPos", oPos, "fSunAngle", fSunAngle);
 
   // DONE : Draw graph or a heatline indicating where you should be able to see the target from
   var aPoints =  getPointsOnLine(map, aLine, iSteps);
 
-  
-
   var fAngle = 0;
   var iTargetAlt = null;
   var iStepDist = 1000 * (iDistance/iSteps);
-    //SOHCAHTOA
+  var fMaxAngle = 0;
+  
+    
   aPoints = aPoints.map(function(latLng, i){
     latLng.alt = getHeightAtPoint(latLng, RGB_Terrain, true);
     if(iTargetAlt == null){
@@ -218,14 +220,71 @@ var drawLine = function(Target, sTimeType){
     } else {
       var iHeight = latLng.alt - iTargetAlt;
       var iDist = i*iStepDist
+      //SOHCAHTOA
       fAngle = Math.atan(iHeight/iDist);
     }
 
     latLng.fAngle = fAngle;
-
+    
+    var ViewStatus = VIEW_NONE;
+    if(latLng.fAngle == fMaxAngle){
+      ViewStatus = VIEW_POSS;
+    } else if(latLng.fAngle > fMaxAngle){
+      ViewStatus = VIEW_YES;
+      fMaxAngle = latLng.fAngle ;
+    }
+    latLng.ViewStatus = ViewStatus;
     return latLng;
   });
   
+  
+  // TODO : Get google streetview of that point in the right direction
+  // take filtered copy of aPoints where  l
+  var aViews = aPoints.filter(function(latLng){
+    return latLng.ViewStatus == VIEW_YES;
+  });
+  
+  console.log("Possible Views", aViews);
+  
+  var aRequests = aViews.map(function(latLng){
+    var oParams = {
+      key:"AIzaSyAbeRLv7EJguNsqkPUhd_TYTY657JvMcKc",
+      location: ""+latLng.lat+","+latLng.lng, //latitude/longitu
+      size:"300x200",
+      heading:Math.round(fSunAngle+180) % 360,
+      fov:120,
+      pitch:0,
+      radius:50,
+      source:"outdoor"
+    }
+    var sURL ="https://maps.googleapis.com/maps/api/streetview/metadata";//?parameters
+    return jQuery.getJSON( sURL, oParams, 
+      function(data, textStatus){
+        if(data.status == "OK"){
+          var oTweaked = oParams;
+          oTweaked.location = null;
+          oTweaked.pano = data.pano_id;
+          var sImg = "https://maps.googleapis.com/maps/api/streetview?"+jQuery.param(oTweaked);
+          
+          var oView = L.marker(data.location, {
+            icon: L.icon.fontAwesome({ 
+                iconClasses: 'fa fa-street-view', // you _could_ add other icon classes, not tested.
+                markerColor: '#00a9ce',
+                iconColor: '#FFF'
+            })
+          }).bindPopup(L.popup({
+            minWidth:400
+          }).setContent(
+            "<img src=\""+sImg+"\" >"
+          )).addTo(oLineLayer);
+
+        }
+      });
+    
+  });
+  
+  // map that into requests to https://developers.google.com/maps/documentation/streetview/metadata
+  // if there is an image available add a pop up (at the location it sends back) pointing back along the line
   //console.log("aPoints", aPoints);
 
   var fMaxAngle = 0;
@@ -233,15 +292,7 @@ var drawLine = function(Target, sTimeType){
   L.multiOptionsPolyline(aPoints, {
     multiOptions: {
         optionIdxFn: function (latLng) {
-            var iColor = 0;
-            if(latLng.fAngle == fMaxAngle){
-              iColor = 1;
-            } else if(latLng.fAngle > fMaxAngle){
-              iColor = 2;
-              fMaxAngle = latLng.fAngle ;
-            }
-            //console.log(iColor);
-            return iColor;
+            return latLng.ViewStatus;
         },
         options: [
             {color: '#FF0000AA'}, {color: '#0000FFAA'}, {color: '#00FF00AA'}]
