@@ -69,20 +69,16 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 //elevation inspiration  https://www.solwise.co.uk/wireless-elevationtool.html
 // sun calc http://suncalc.net/
 
-// Done : find area
-// TODO : find area resets yjr marker to the centre of new area
+// DONE : find area
+// DONE : find area resets yjr marker to the centre of new area
 // DONE : select point
 // DONE : get elevations
 // DONE : find sectors you can see from
-// TODO : find road / parks you should be able to see from
+// DONE : find places there is a street view (road / parks) you should be able to see from
 // TODO : Change day
 // TODO : save plans
-// TODO : scan along thesunset line etc. for it crossing a road where the veiw should be good 
-// TODO : OR use overpass api on a thin triangle 
-// TODO : Triangles representing narrowest (lense focal lenght and DSLR/ SLR/full format choosen from lists)
 // TODO : FOV from the start & end of green sections (done ith same colouring)
 // TODO : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
-
 
 
 // TODO : Login/ Register
@@ -98,7 +94,7 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 
 // TODO : Will in work on phone / tablet
 // TODO : cordova if it will
-
+// BUG : Dragging seems to break the view line
 
 function getDirectionalLine(target, angle, distance) {
   // get position of the sun (azimuth and altitude) at today's sunrise
@@ -113,6 +109,7 @@ function getDirectionalLine(target, angle, distance) {
 }
 
 var map = L.map('map').setView([53.3494, -1.5664], 11);
+var oLine ;
 
 //Add the address search 
 map.addControl( new L.Control.Search({
@@ -124,7 +121,10 @@ map.addControl( new L.Control.Search({
 		marker: L.circleMarker([0,0],{radius:30}),
 		autoCollapse: true,
 		autoType: false,
-		minLength: 2
+		minLength: 2,
+    moveToLocation: function(latlng, title, oMap){
+      oTarget.setLatLng(latlng);
+    }
   }) );
 
 
@@ -289,7 +289,7 @@ var drawLine = function(Target, sTimeType){
 
   var fMaxAngle = 0;
   
-  L.multiOptionsPolyline(aPoints, {
+  oLine = L.multiOptionsPolyline(aPoints, {
     multiOptions: {
         optionIdxFn: function (latLng) {
             return latLng.ViewStatus;
@@ -310,6 +310,8 @@ var drawLine = function(Target, sTimeType){
     })
 }).addTo(oLineLayer);*/
   
+  //map.fitBounds(oLine.getBounds(),{padding:[20,20]});
+  
   
 }
 
@@ -317,11 +319,12 @@ var drawLine = function(Target, sTimeType){
 
 // TODO : make target a singleton marker which can be moved / replaced on a search
 var target = [53.3797, -1.4744];
+var oTarget = L.marker(target);
 setTimeout(function(){
   target = [53.3797, -1.4744];
 //var oTarget = L.marker(target).addTo(map);
   
-  var oTarget = L.marker(target, {
+  oTarget = L.marker(target, {
     draggable:true,
     icon: L.icon.fontAwesome({ 
         iconClasses: 'fa fa-camera', // you _could_ add other icon classes, not tested.
@@ -337,9 +340,13 @@ setTimeout(function(){
   });
 
   oTarget.setLatLng(target);
-}, 10000);
+}, 5000);
 
 jQuery("#timetype").on("change",function(evt){
   drawLine(target, jQuery("#timetype").val());
 });
 //setTimeout(function(){drawLine(target)}, 10000);
+
+jQuery("#zoomToLine").on("click",function(){
+  map.fitBounds(oLine.getBounds(),{padding:[20,20]});
+})
