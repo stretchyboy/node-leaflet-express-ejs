@@ -12,7 +12,6 @@ dependencies:
   express-ejs-layouts: 2.4.0
   express-http-proxy: 1.2.0
   file-loader: 1.1.11
-  font-awesome: 4.7.0
   fontawesome: 4.7.2
   fork-ts-checker-webpack-plugin: 0.4.2
   hard-source-webpack-plugin: 0.9.0
@@ -2652,12 +2651,6 @@ packages:
       node: '>=4.0'
     resolution:
       integrity: sha512-fdrt472/9qQ6Kgjvb935ig6vJCuofpBUD14f9Vb+SLlm7xIe4Qva5gey8EKtv8lp7ahE1wilg3xL1znpVGtZIA==
-  /font-awesome/4.7.0:
-    dev: false
-    engines:
-      node: '>=0.10.3'
-    resolution:
-      integrity: sha1-j6jPBBGhoxr9B7BtKQK7n8gVoTM=
   /fontawesome/4.7.2:
     dev: false
     resolution:
@@ -7648,7 +7641,6 @@ specifiers:
   express-ejs-layouts: ^2.4.0
   express-http-proxy: ^1.2.0
   file-loader: ^1.1.11
-  font-awesome: ^4.7.0
   fontawesome: ^4.7.2
   fork-ts-checker-webpack-plugin: ^0.4.2
   hard-source-webpack-plugin: ^0.9.0

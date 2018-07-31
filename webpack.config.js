@@ -1,5 +1,5 @@
 const path = require('path');
-var HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+//var HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
   module.exports = {
@@ -10,7 +10,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
       path: path.resolve(__dirname, 'dist')
     },
     plugins: [
-      new HardSourceWebpackPlugin(),
+      //new HardSourceWebpackPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional

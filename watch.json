@@ -10,10 +10,11 @@
       "^public/",
       "^dist/"
     ],
-    "include": [
-      "\\.js$",
-      "\\.coffee$",
-      "\\.json"
+     "include": [
+      "^sh/",
+      "\\.json",
+      "^webpack\\.config\\.js$",
+      "^src/\\.eslintrc\\.js$"
     ]
   },
   "throttle": 100
