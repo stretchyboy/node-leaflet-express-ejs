@@ -80,6 +80,23 @@ db.logIn('batman', 'brucewayne', function (err, response) {
 // TODO : FOV from the start & end of green sections (done ith same colouring)
 // TODO : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
 
+function getOpposite(sensorWidth, focalLength, distanceM){
+    var angle = 2 * Math.atan(sensorWidth/(2 * focalLength));
+    var oppositeM = distanceM * Math.sin(angle);
+    return oppositeM;    
+}
+
+function drawCone(lStart, lFocus, sensorWidth, focalLength ){
+    var oppositeM = getOpposite(sensorWidth, focalLength, distanceM);
+    var distanceM = distance(map, lStart, lFocus);
+    
+    var aPoints = [
+        destination(lStart, (heading + 90) % 360, distanceM),
+        lStart,
+        destination(lStart, (heading - 90) % 360, distanceM),
+        
+    
+}
 
 // TODO : Login/ Register
 // TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
