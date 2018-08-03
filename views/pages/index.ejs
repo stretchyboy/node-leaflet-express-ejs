@@ -2,54 +2,57 @@
 <html lang="en">
 
 <head>
-  <% include ../partials/head %>
+    <% include ../partials/head %>
 </head>
-  
+
 <body class="container">
 
-  <header>
-    <% include ../partials/header %>
-  </header>
+    <header>
+        <% include ../partials/header %>
+    </header>
 
-  <main>
-    
-    <div id="sidebar" class="leaflet-sidebar collapsed">
-        <!-- Nav tabs -->
-        <div class="leaflet-sidebar-tabs">
-            <ul role="tablist">
-                <li><a href="#home" role="tab"><i class="fa fa-anchor active"></i></a></li>
-                <li><a href="#about" role="tab"><i class="fa fa-info"></i></a></li>
-                <!--<li class="disabled"><a href="#messages" role="tab"><i class="fa fa-anchor"></i></a></li>-->
-                <li><a id="zoomToLine"><i class="fa fa-map"></i></a></li>
-            </ul>
+    <main>
 
-            <ul role="tablist">
-                <li><a href="https://github.com/nickpeihl/leaflet-sidebar-v2"><i class="fa fa-github"></i></a></li>
-            </ul>
-        </div>
+        <div id="sidebar" class="leaflet-sidebar collapsed">
+            <!-- Nav tabs -->
+            <div class="leaflet-sidebar-tabs">
+                <ul role="tablist">
+                    <li><a href="#home" role="tab"><i class="fa fa-anchor active"></i></a></li>
+                    <li><a href="#about" role="tab"><i class="fa fa-info"></i></a></li>
 
-        <!-- Tab panes -->
-        <div class="leaflet-sidebar-content">
-            <div class="leaflet-sidebar-pane" id="home">
-                <h1 class="leaflet-sidebar-header">
-                    Where to Shoot
-                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
-                </h1>
-              
-              
-                <p>Landscape and drone photography planning tools</p>
-                <ul>
-                  <li>
-                    Choose a place you want in the centre of your shot (drag <i class="fa fa-camera"></i> or use the search)
-                  </li>
-                  <li>Choose a time of day and date below</li>
-                <li>The green sections of the line should give you a decent veiw</li>
-                    <li>Click <i class="fa fa-street-view "></i> for a view towards the target</li>
-              </ul>
-              <div>
-                
-            <label>What Event</label>
-            <select id="timetype">
+                    <li><a href="#camera" role="tab"><i class="fa fa-camera"></i></a></li>
+
+                    <!--<li class="disabled"><a href="#messages" role="tab"><i class="fa fa-anchor"></i></a></li>-->
+                    <li><a id="zoomToLine"><i class="fa fa-map"></i></a></li>
+                </ul>
+
+                <ul role="tablist">
+                    <li><a href="https://github.com/nickpeihl/leaflet-sidebar-v2"><i class="fa fa-github"></i></a></li>
+                </ul>
+            </div>
+
+            <!-- Tab panes -->
+            <div class="leaflet-sidebar-content">
+                <div class="leaflet-sidebar-pane" id="home">
+                    <h1 class="leaflet-sidebar-header">
+                        Where to Shoot
+                        <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    </h1>
+
+
+                    <p>Landscape and drone photography planning tools</p>
+                    <ul>
+                        <li>
+                            Choose a place you want in the centre of your shot (drag <i class="fa fa-camera"></i> or use the search)
+                        </li>
+                        <li>Choose a time of day and date below</li>
+                        <li>The green sections of the line should give you a decent veiw</li>
+                        <li>Click <i class="fa fa-street-view "></i> for a view towards the target</li>
+                    </ul>
+                    <div>
+
+                        <label>What Event</label>
+                        <select id="timetype">
               <option value="nauticalDawn">Nautical Dawn</option>
               <option value="dawn">Dawn</option>
               <option value="sunrise" selected >Sunrise</option>
@@ -61,45 +64,87 @@
               <option value="sunset">Sunset</option>
               <option value="dusk">Dusk</option>
               <option value="nauticalDusk">Nautical Dusk</option>
-            </select>  
-              </div>
-              <div>
-                
-              <label>On What Date?</label>
-            <input id="timedate" type="date" />
-              <p>
-                Time <span id="time"></span>
-              </p>
-              </div>
-            </div>
+            </select>
+                    </div>
+                    <div>
 
-            <div class="leaflet-sidebar-pane" id="about">
-                <h1 class="leaflet-sidebar-header">About<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-            <h2>
-                    Where to Shoot
-              </h2>
+                        <label>On What Date?</label>
+                        <input id="timedate" type="date" />
+                        <p>
+                            Time <span id="time"></span>
+                        </p>
+                    </div>
+                </div>
 
-                <p>Landscape and drone photography planning tools</p>
-                <p >
-                  made with <i class="fa fa-heart" aria-hidden="true"></i> in <a href="https://en.wikipedia.org/wiki/Sheffield">Sheffield</a>
-                </p>
+                <div class="leaflet-sidebar-pane" id="about">
+                    <h1 class="leaflet-sidebar-header">About<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                    <h2>
+                        Where to Shoot?
+                    </h2>
 
-          </div>
+                    <p>Landscape and drone photography planning tools</p>
+                    <p>
+                        made with <i class="fa fa-heart" aria-hidden="true"></i> in <a href="https://en.wikipedia.org/wiki/Sheffield">Sheffield</a>
+                    </p>
 
-            <div class="leaflet-sidebar-pane" id="messages">
-                <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                </div>
+
+
+
+
+
+
+                <div class="leaflet-sidebar-pane" id="camera">
+                    <h1 class="leaflet-sidebar-header">
+                        Camera Views
+                        <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    </h1>
+
+
+                    <div>
+
+                        <label>Lens Focal Length</label>
+                        <select id="lensfl">
+                            <option value="none" selected >Select One</option>
+              <option value="25">25mm</option>
+              <option value="35">35mm</option>
+              <option value="50"  >50mm</option>
+              <option value="100" >100mm</option>
+              <option value="200">200mm</option>
+              
+              <option value="300">300mm</option>
+              <option value="500">500mm</option>
+            </select>
+                    </div>
+                    <div>
+
+                        <label>Camera Sensor Width</label>
+                        <select id="camerasw">
+              <option value="25">25mm</option>
+              <option value="36" selected >36mm</option>
+              <option value="50"  >50mm</option>
+            </select>
+                    </div>
+                </div>
+
+
+
+
+
+                <div class="leaflet-sidebar-pane" id="messages">
+                    <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div id="map"></div>
-  </main>
 
-  <footer>
-    <% include ../partials/footer %>
-  </footer>
+        <div id="map"></div>
+    </main>
 
-  <% include ../partials/scripts %>
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+
+    <% include ../partials/scripts %>
 </body>
 
 </html>
