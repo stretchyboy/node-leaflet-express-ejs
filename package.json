@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "solo": "node server.js",
     "live": "NODE_ENV=live node server.js",
-    "start": "webpack && DEBUG=true node server.js"
+    "start": "node server.js",
+    "build": "webpack && DEBUG=true node server.js"
   },
   "repository": {
     "type": "git",

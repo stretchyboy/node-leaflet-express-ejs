@@ -30,6 +30,7 @@ PouchDB.plugin(PouchAuth);
 //https://github.com/pouchdb/add-cors-to-couchdb
 
 var bAuth = false;
+var iTimer = 0;
 
 //https://pouchdb.com/getting-started.html
 var local = new PouchDB('local_db');
@@ -92,19 +93,18 @@ if (bAuth) {
 
 function getOpposite(sensorWidth, focalLength, distanceM) {
     var angle = Math.atan(sensorWidth / (2 * focalLength));
-    console.log("angle", angle);
     var oppositeM = distanceM * Math.sin(angle);
     return oppositeM;
 }
 
 function drawCone(lFocus, lStart) {
-    var fl = jQuery("#lensfl").val() ;
-    if(fl == "none"){
+    var fl = jQuery("#lensfl").val();
+    if (fl == "none") {
         return true;
     }
     var focalLength = fl * (1 / 1000);
     var sensorWidth = jQuery("#camerasw").val() * (1 / 1000);
-    
+
     var distanceM = lStart.distanceTo(lFocus);
     //var distanceM = GeometryUtil.distance(map, lStart, lFocus);
     var oppositeM = getOpposite(sensorWidth, focalLength, distanceM);
@@ -216,8 +216,11 @@ map.on('locationfound', onLocationFound);
 
 L.control.locate({
     position: "topright",
-    keepCurrentZoomLevel:true,
-    drawCircle:false,
+    keepCurrentZoomLevel: true,
+    drawCircle: false,
+    locateOptions: {
+        watch: false
+    }
 }).addTo(map);
 
 var layerControl = L.control.layers(baseMaps, overlayMaps, {
@@ -261,14 +264,14 @@ function getPointsOnLine(map, aLine, steps) {
     return aList;
 }
 
-function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom){
-    
+function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
+
     var aPoints = getPointsOnLine(map, aLine, iSteps);
     var fAngle = 0;
     var iTargetAlt = null;
     var iStepDist = 1000 * (iDistance / iSteps);
     var fMaxAngle = 0;
-    if(bViewFrom == null){
+    if (bViewFrom == null) {
         bViewFrom = false;
     }
 
@@ -285,15 +288,15 @@ function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom){
         }
 
         latLng.fAngle = fAngle;
-        if(bViewFrom){
-            var ViewStatus = VIEW_YES ;
+        if (bViewFrom) {
+            var ViewStatus = VIEW_YES;
             if (latLng.fAngle == fMaxAngle) {
                 ViewStatus = VIEW_POSS;
             } else if (latLng.fAngle > fMaxAngle) {
                 ViewStatus = VIEW_NONE;
                 fMaxAngle = latLng.fAngle;
             }
-        } else{
+        } else {
             var ViewStatus = VIEW_NONE;
             if (latLng.fAngle == fMaxAngle) {
                 ViewStatus = VIEW_POSS;
@@ -305,7 +308,7 @@ function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom){
         latLng.ViewStatus = ViewStatus;
         return latLng;
     });
-    
+
     var fMaxAngle = 0;
 
     oLine = L.multiOptionsPolyline(aPoints, {
@@ -327,8 +330,8 @@ function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom){
         opacity: 0.75,
         smoothFactor: 1
     }).addTo(oLineLayer);
-    
-    
+
+
     return aPoints;
 }
 
@@ -339,13 +342,11 @@ const VIEW_POSS = 1;
 const VIEW_YES = 2;
 
 var drawLine = function (Target, sTimeType, sDate) {
-    //console.log("drawLine", Target, sTimeType, sDate);
     var oDate = new Date();
     if (sDate) {
         oDate = new Date(sDate);
     }
-    
-    //console.log("oDate",oDate);
+
     oLineLayer.clearLayers();
     //var sTimeType = "sunrise";
     var target = [Target.lat, Target.lng];
@@ -359,8 +360,7 @@ var drawLine = function (Target, sTimeType, sDate) {
     var aLine = getDirectionalLine(target, fSunAngle, iDistance, "red");
 
     // TODO : put all this info in the sidebar
-    //console.log("times."+sTimeType, times[sTimeType], "oPos", oPos, "fSunAngle", fSunAngle);
-
+    
     // DONE : Draw graph or a heatline indicating where you should be able to see the target from
     var aPoints = drawViewLine(map, aLine, iSteps, iDistance);
 
@@ -369,53 +369,59 @@ var drawLine = function (Target, sTimeType, sDate) {
     var aViews = aPoints.filter(function (latLng) {
         return latLng.ViewStatus == VIEW_YES;
     });
-    
-   
-    
-    var aRequests = aViews.map(function (latLng) {
-        drawCone(aPoints[0], latLng);
-        
-        
-        var oParams = {
-            key: process.env.GOOGLE_MAPS_API,
-            location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
-            size: "300x200",
-            heading: Math.round(fSunAngle + 180) % 360,
-            fov: 120,
-            pitch: 0,
-            radius: 50,
-            source: "outdoor"
-        }
-        var sURL = "https://maps.googleapis.com/maps/api/streetview/metadata"; //?parameters
-        return jQuery.getJSON(sURL, oParams,
-            function (data, textStatus) {
-                if (data.status == "OK") {
-                    var oTweaked = oParams;
-                    oTweaked.location = null;
-                    oTweaked.pano = data.pano_id;
-                    var sImg = "https://maps.googleapis.com/maps/api/streetview?" + jQuery.param(oTweaked);
 
-                    var oView = L.marker(data.location, {
-                        icon: L.icon.fontAwesome({
-                            iconClasses: 'fa fa-street-view', // you _could_ add other icon classes, not tested.
-                            //markerColor: '#00a9ce',
-                            markerColor: '#00cea9',
-                            iconColor: '#FFF'
-                        })
-                    }).bindPopup(L.popup({
-                        minWidth: 300
-                    }).setContent(
-                        '<a target="_blank" href="https://www.google.com/maps/@?api=1&map_action=pano&' +
-                        jQuery.param(oTweaked) + '" >' +
-                        "<img src=\"" + sImg + "\" ></a>"
-                    )).addTo(oLineLayer);
-                }
-            });
+
+    aViews.forEach(function (latLng) {
+        drawCone(aPoints[0], latLng);
     });
+
+
+    window.clearTimeout(iTimer);
+    iTimer = window.setTimeout(function () {
+        var aRequests = aViews.map(function (latLng) {
+            var oParams = {
+                key: process.env.GOOGLE_MAPS_API,
+                location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
+                size: "300x200",
+                heading: Math.round(fSunAngle + 180) % 360,
+                fov: 120,
+                pitch: 0,
+                radius: 50,
+                source: "outdoor"
+            };
+
+            var sURL = "https://maps.googleapis.com/maps/api/streetview/metadata"; //?parameters
+            return jQuery.getJSON(sURL, oParams,
+                function (data, textStatus) {
+                    if (data.status == "OK") {
+                        var oTweaked = oParams;
+                        oTweaked.location = null;
+                        oTweaked.pano = data.pano_id;
+                        var sImg = "https://maps.googleapis.com/maps/api/streetview?" + jQuery.param(oTweaked);
+
+                        var oView = L.marker(data.location, {
+                            icon: L.icon.fontAwesome({
+                                iconClasses: 'fa fa-street-view', // you _could_ add other icon classes, not tested.
+                                //markerColor: '#00a9ce',
+                                markerColor: '#00cea9',
+                                iconColor: '#FFF'
+                            })
+                        }).bindPopup(L.popup({
+                            minWidth: 300
+                        }).setContent(
+                            '<a target="_blank" href="https://www.google.com/maps/@?api=1&map_action=pano&' +
+                            jQuery.param(oTweaked) + '" >' +
+                            "<img src=\"" + sImg + "\" ></a>"
+                        )).addTo(oLineLayer);
+                    }
+                });
+        });
+    }, 100);
+
+
 
     // map that into requests to https://developers.google.com/maps/documentation/streetview/metadata
     // if there is an image available add a pop up (at the location it sends back) pointing back along the line
-    //console.log("aPoints", aPoints);
 }
 
 jQuery("#timedate").val(new Date());
@@ -440,7 +446,7 @@ setTimeout(function () {
 
     oTarget.on("move", function (evt) {
         target = evt.latlng;
-        drawLine(target, jQuery("#timetype").val(), jQuery("#timedate").val());
+            drawLine(target, jQuery("#timetype").val(), jQuery("#timedate").val());
     });
 
     oTarget.setLatLng(target);
