@@ -12,6 +12,7 @@ import "leaflet-tilelayer-colorpicker";
 import 'leaflet-sidebar-v2';
 import "Leaflet.MultiOptionsPolyline";
 import "leaflet-fontawesome-markers";
+import "leaflet.locatecontrol";
 
 // DONE : Move to full screen map?
 
@@ -21,15 +22,12 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-search/dist/leaflet-search.min.css";
 import "leaflet-sidebar-v2/css/leaflet-sidebar.css";
 import "leaflet-fontawesome-markers/L.Icon.FontAwesome.css";
-
+import "leaflet.locatecontrol/dist/L.Control.Locate.mapbox.css";
 
 import PouchDB from "pouchdb";
 import PouchAuth from "pouchdb-authentication";
 PouchDB.plugin(PouchAuth);
 //https://github.com/pouchdb/add-cors-to-couchdb
-
-var sMapKey = process.env.GOOGLE_MAPS_API;
-console.log("sMapKey", sMapKey);
 
 var bAuth = false;
 
@@ -210,6 +208,18 @@ L.control.scale({
     position: "topright"
 }).addTo(map);
 
+function onLocationFound(e) {
+    oTarget.setLatLng(e.latlng);
+}
+
+map.on('locationfound', onLocationFound);
+
+L.control.locate({
+    position: "topright",
+    keepCurrentZoomLevel:true,
+    drawCircle:false,
+}).addTo(map);
+
 var layerControl = L.control.layers(baseMaps, overlayMaps, {
     position: "topright"
 }).addTo(map);
@@ -367,7 +377,7 @@ var drawLine = function (Target, sTimeType, sDate) {
         
         
         var oParams = {
-            key: sMapKey,
+            key: process.env.GOOGLE_MAPS_API,
             location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
             size: "300x200",
             heading: Math.round(fSunAngle + 180) % 360,
