@@ -96,43 +96,6 @@ function getOpposite(sensorWidth, focalLength, distanceM) {
     return oppositeM;
 }
 
-
-var fl = 300 * (1 / 1000);
-var sw = 36 * (1 / 1000);
-/*
-var opp =  getOpposite(sw, fl, 1000*10);
-console.log("opp", opp/1000);
-
-
-var fl = 300 * (1 / 1000);
-var opp =  getOpposite(sw, fl, 1000*10);
-console.log("opp 2 ", opp/1000);
-
-var fl = 50 * (1 / 1000);
-var opp =  getOpposite(sw, fl, 1000*7);
-console.log("opp 3 ", opp/1000);
-*/
-/*
-function drawCone(lFocus, lStart, sensorWidth, focalLength) {
-    var distanceM = lStart.distanceTo(lFocus);
-    //var distanceM = GeometryUtil.distance(map, lStart, lFocus);
-    var oppositeM = getOpposite(sensorWidth, focalLength, distanceM);
-    var heading = GeometryUtil.bearing(lStart, lFocus);
-    var aPoints = [
-        GeometryUtil.destination(lFocus, (heading + 90) % 360, oppositeM),
-        lStart,
-        GeometryUtil.destination(lFocus, (heading - 90) % 360, oppositeM),
-        GeometryUtil.destination(lFocus, (heading + 90) % 360, oppositeM)
-    ];
-    console.log("distanceM", distanceM, "oppositeM", oppositeM, "heading", heading, "aPoints", aPoints);
-    var oCone = L.polyline(aPoints, {
-        color: '#00FF00AA'
-    }).addTo(oLineLayer);
-}
-
-*/
-
-
 function drawCone(lFocus, lStart) {
     var fl = jQuery("#lensfl").val() ;
     if(fl == "none"){
@@ -236,8 +199,6 @@ var overlayMaps = {
     "Temp": temp
 };
 
-
-
 L.control.zoom({
     position: "topright"
 }).addTo(map);
@@ -249,7 +210,6 @@ L.control.scale({
 var layerControl = L.control.layers(baseMaps, overlayMaps, {
     position: "topright"
 }).addTo(map);
-
 
 //Add the address search 
 map.addControl(new L.Control.Search({
@@ -270,8 +230,6 @@ map.addControl(new L.Control.Search({
     }
 }));
 
-
-
 var oLineLayer = L.layerGroup().addTo(map);
 
 var sidebar = L.control.sidebar({
@@ -290,11 +248,9 @@ function getPointsOnLine(map, aLine, steps) {
     return aList;
 }
 
-
 function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom){
     
     var aPoints = getPointsOnLine(map, aLine, iSteps);
-
     var fAngle = 0;
     var iTargetAlt = null;
     var iStepDist = 1000 * (iDistance / iSteps);
@@ -375,6 +331,7 @@ var drawLine = function (Target, sTimeType, sDate) {
     if (sDate) {
         oDate = new Date(sDate);
     }
+    
     //console.log("oDate",oDate);
     oLineLayer.clearLayers();
     //var sTimeType = "sunrise";
@@ -389,7 +346,7 @@ var drawLine = function (Target, sTimeType, sDate) {
     var aLine = getDirectionalLine(target, fSunAngle, iDistance, "red");
 
     // TODO : put all this info in the sidebar
-    //nsole.log("times."+sTimeType, times[sTimeType], "oPos", oPos, "fSunAngle", fSunAngle);
+    //console.log("times."+sTimeType, times[sTimeType], "oPos", oPos, "fSunAngle", fSunAngle);
 
     // DONE : Draw graph or a heatline indicating where you should be able to see the target from
     var aPoints = drawViewLine(map, aLine, iSteps, iDistance);
@@ -399,11 +356,9 @@ var drawLine = function (Target, sTimeType, sDate) {
     var aViews = aPoints.filter(function (latLng) {
         return latLng.ViewStatus == VIEW_YES;
     });
-
-    //console.log("Possible Views", aViews);
-
+    
     var aRequests = aViews.map(function (latLng) {
-        drawCone(aPoints[0], latLng, sw, fl);
+        drawCone(aPoints[0], latLng);
 
         var oParams = {
             key: "AIzaSyAbeRLv7EJguNsqkPUhd_TYTY657JvMcKc",
@@ -451,6 +406,8 @@ jQuery("#timedate").val(new Date());
 // TODO : make target a singleton marker which can be moved / replaced on a search
 var target = [53.3797, -1.4744];
 var oTarget = L.marker(target);
+var oEnd = null;
+
 setTimeout(function () {
     target = [53.3797, -1.4744];
     //var oTarget = L.marker(target).addTo(map);
@@ -463,7 +420,6 @@ setTimeout(function () {
             iconColor: '#FFF'
         })
     }).addTo(map);
-
 
     oTarget.on("move", function (evt) {
         target = evt.latlng;
