@@ -42,9 +42,10 @@ if (bLive) {
 
     app.use(require("webpack-hot-middleware")(compiler));
 
-} else {
-    app.use("/dist", express.static('dist'));
 }
+    
+app.use("/dist", express.static('dist'));
+
 
 
 // Get port from environment and store in Express
