@@ -49,8 +49,17 @@
                         <li>The green sections of the line should give you a decent veiw</li>
                         <li>Click <i class="fa fa-street-view "></i> for a view towards the target</li>
                     </ul>
-                    <div>
 
+                    <div>
+                        <label>Where are a shooting?</label>
+                        <select id="shootingdirection">
+              <option value="at" selected>Shoot Towards</option>
+              <option value="from">Shoot From</option>
+              <option value="between"  >Shoot Between</option>
+                 </select>
+                    </div>
+
+                    <div>
                         <label>What Event</label>
                         <select id="timetype">
               <option value="nauticalDawn">Nautical Dawn</option>
@@ -89,18 +98,11 @@
 
                 </div>
 
-
-
-
-
-
                 <div class="leaflet-sidebar-pane" id="camera">
                     <h1 class="leaflet-sidebar-header">
                         Camera Views
                         <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
                     </h1>
-
-
                     <div>
 
                         <label>Lens Focal Length</label>

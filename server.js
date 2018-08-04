@@ -1,6 +1,6 @@
 #!/usr/bin/env node
+require('dotenv').config();
 
-// module dependencies
 var express = require('express');
 var proxy = require('express-http-proxy');
 var morgan = require('morgan')
@@ -24,8 +24,6 @@ app.get('/about', function (req, res) {
     res.render('pages/about');
 });
 
-console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-
 var bLive = (process.env.NODE_ENV == "live");
 
 if (bLive) {
@@ -45,7 +43,7 @@ if (bLive) {
     app.use(require("webpack-hot-middleware")(compiler));
 
 } else {
-    app.use(express.static('dist'));
+    app.use("/dist", express.static('dist'));
 }
 
 

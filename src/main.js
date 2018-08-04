@@ -28,6 +28,9 @@ import PouchAuth from "pouchdb-authentication";
 PouchDB.plugin(PouchAuth);
 //https://github.com/pouchdb/add-cors-to-couchdb
 
+var sMapKey = process.env.GOOGLE_MAPS_API;
+console.log("sMapKey", sMapKey);
+
 var bAuth = false;
 
 //https://pouchdb.com/getting-started.html
@@ -357,11 +360,14 @@ var drawLine = function (Target, sTimeType, sDate) {
         return latLng.ViewStatus == VIEW_YES;
     });
     
+   
+    
     var aRequests = aViews.map(function (latLng) {
         drawCone(aPoints[0], latLng);
-
+        
+        
         var oParams = {
-            key: "AIzaSyAbeRLv7EJguNsqkPUhd_TYTY657JvMcKc",
+            key: sMapKey,
             location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
             size: "300x200",
             heading: Math.round(fSunAngle + 180) % 360,
@@ -382,7 +388,8 @@ var drawLine = function (Target, sTimeType, sDate) {
                     var oView = L.marker(data.location, {
                         icon: L.icon.fontAwesome({
                             iconClasses: 'fa fa-street-view', // you _could_ add other icon classes, not tested.
-                            markerColor: '#00a9ce',
+                            //markerColor: '#00a9ce',
+                            markerColor: '#00cea9',
                             iconColor: '#FFF'
                         })
                     }).bindPopup(L.popup({
