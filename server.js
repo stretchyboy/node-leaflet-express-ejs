@@ -8,24 +8,45 @@ var morgan = require('morgan')
 // get port from environment and store in Express
 var app = express();
 
-app.use(morgan('combined'))
+app.use(morgan('combined'));
 
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
 // use res.render to load up an ejs view file
 // index page
-app.get('/', function(req, res) {
-  res.render('pages/index');
+app.get('/', function (req, res) {
+    res.render('pages/index');
 });
 
 // about page
-app.get('/about', function(req, res) {
-  res.render('pages/about');
+app.get('/about', function (req, res) {
+    res.render('pages/about');
 });
 
+console.log("process.env.NODE_ENV", process.env.NODE_ENV);
 
-app.use(express.static('dist'))
+var bLive = (process.env.NODE_ENV == "live");
+
+if (bLive) {
+    const path = require("path");
+    const webpack = require("webpack");
+    const webpackConfig = require("./webpack.config");
+    const compiler = webpack(webpackConfig);
+    // webpack hmr
+
+    app.use(
+        require("webpack-dev-middleware")(compiler, {
+            noInfo: true,
+            publicPath: webpackConfig.output.publicPath
+        })
+    );
+
+    app.use(require("webpack-hot-middleware")(compiler));
+
+} else {
+    app.use(express.static('dist'));
+}
 
 
 // Get port from environment and store in Express
