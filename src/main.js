@@ -269,7 +269,6 @@ function getPointsOnLine(map, aLine, steps) {
         var P1 = GeometryUtil.interpolateOnLine(map, aLine, i * (1 / steps));
         aList.push(P1.latLng);
     }
-    console.log("getPointsOnLine aList[0], aList[0]")
     return aList;
 }
 
@@ -279,7 +278,6 @@ function getCameraHeight(){
 }
 
 function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
-    console.log("drawViewLine bViewFrom", bViewFrom, "aLine[0]", aLine[0]);
     var cameraHeight = getCameraHeight();
 
     var aPoints = getPointsOnLine(map, aLine, iSteps);
@@ -320,7 +318,6 @@ function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
                 ViewStatus = VIEW_YES;
                 fMaxAngle = latLng.fAngle;
             }
-            //console.log(i, "latLng.alt", latLng.alt, "latLng.fAngle", latLng.fAngle , "fMaxAngle", fMaxAngle, "ViewStatus", ViewStatus )
             
         } else {
             var ViewStatus = VIEW_NONE;
@@ -375,7 +372,6 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
         oDate = new Date(sDate);
     }
     var Target = oEye.getLatLng();
-    console.log("Target",Target);
     if (sShootingDirection == "from") {
         Target = oCamera.getLatLng();
     }
@@ -398,19 +394,9 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     }
 
     var aLine = getDirectionalLine(target, fSunAngle, iDistance, "red");
-    /*//move camera
-    if (sShootingDirection == "towards") {
-        console.log("towards", aLine[0], aLine[1], target)
-        oCamera.setLatLng(aLine[1]);
-    } else if (sShootingDirection == "from") {
-        oEye.setLatLng(aLine[1]);
-    }*/
-
     // TODO : put all this info in the sidebar
 
     var bViewFrom = (sShootingDirection == "from");
-
-    console.log("bViewFrom", bViewFrom);
     // DONE : Draw graph or a heatline indicating where you should be able to see the target from
     var aPoints = drawViewLine(map, aLine, iSteps, iDistance, bViewFrom);
 
@@ -436,14 +422,14 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
         window.clearTimeout(iTimer);
         iTimer = window.setTimeout(function () {
             var fHeading = Math.round(fSunAngle + 180) % 360;
-            var aRequests = aViews.map(requestStreetView.bind(this, fHeading, Target));
+            var aRequests = aViews.map(requestStreetViews.bind(this, fHeading, Target));
         }, 100);
     } else{
         drawCone(oEye.getLatLng(), oCamera.getLatLng());
 
         window.clearTimeout(iTimer);
         iTimer = window.setTimeout(function () {
-            requestStreetView(fSunAngle, aLine[1], aLine[0], oCamera);
+            requestStreetViews(fSunAngle, aLine[1], aLine[0], oCamera);
         }, 100);
     }
     
@@ -453,12 +439,12 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     return true;
 }
 
-var requestStreetView = function (fHeading, lineEnd, latLng, oMarker) {
+var requestStreetViews = function (fHeading, lineEnd, latLng, oMarker) {
             var oParams = {
                 key: process.env.GOOGLE_MAPS_API,
                 location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
                 size: "300x200",
-                heading: Math.round(fHeading + 180) % 360,
+                heading: fHeading,
                 fov: 120,
                 pitch: 0,
                 radius: 50,
@@ -515,7 +501,7 @@ var _drawBetween = function () {
 /*
     window.clearTimeout(iTimer);
     iTimer = window.setTimeout(function () {
-        requestStreetView(fHeading,aLine[1], aLine[0], oCamera);
+        requestStreetViews(fHeading,aLine[1], aLine[0], oCamera);
     }, 100);
 */
 
@@ -555,7 +541,6 @@ setTimeout(function () {
 
     oEye.on("move", function (evt) {
         if (sShootingDirection == "from") {
-            console.log("don't redraw line")
             return true;
         }
         return drawLine();
@@ -572,7 +557,6 @@ setTimeout(function () {
 
     oCamera.on("move", function (evt) {
         if (sShootingDirection == "towards") {
-            console.log("don't redraw line")
             return true;
         }
         drawLine();
