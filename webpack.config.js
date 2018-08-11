@@ -7,12 +7,12 @@ const sOutputDir = "/";
 
 module.exports = {
     mode: "development",
-    devtool:"cheap-eval-source-map",
+    devtool: "cheap-eval-source-map",
     entry: './src/main.js',
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'dist'),
-         publicPath: '/dist'
+        publicPath: '/dist'
     },
     plugins: [
           //new HardSourceWebpackPlugin(),
@@ -41,6 +41,8 @@ module.exports = {
           "css-loader"
         ]
       },
+             {test: /\.ejs$/, use: ['ejs-compiled-loader']},
+            
        /*{
          test: /\.css$/,
          use: [
@@ -67,7 +69,7 @@ module.exports = {
                     loader: 'file-loader',
                     options: {
                         // name: '[name].[ext]',
-                        outputPath: sOutputDir+'fonts/',
+                        outputPath: sOutputDir + 'fonts/',
                         publicPath: '/dist/fonts/'
                     }
                 }]

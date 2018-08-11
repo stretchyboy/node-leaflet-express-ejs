@@ -489,8 +489,8 @@ var _drawBetween = function () {
     var aLine = aoLine.map(function(oPoint){
         return [oPoint.lat, oPoint.lng];
     });
-    var iDistance = aoLine[0].distanceTo(aLine[1]);
-    var fHeading = GeometryUtil.bearing(aoLine[0], aLine[1]);
+    var iDistance = aoLine[0].distanceTo(aoLine[1]);
+    var fHeading = GeometryUtil.bearing(aoLine[0], aoLine[1]);
     oLineLayer.clearLayers();
     
     var bViewFrom = true;
@@ -498,6 +498,8 @@ var _drawBetween = function () {
 
 
     drawCone(aoLine[1], aoLine[0]);
+    
+    _findBetween();
 /*
     window.clearTimeout(iTimer);
     iTimer = window.setTimeout(function () {
@@ -509,6 +511,79 @@ var _drawBetween = function () {
     // map that into requests to https://developers.google.com/maps/documentation/streetview/metadata
     // if there is an image available add a pop up (at the location it sends back) pointing back along the line
     return true;
+}
+
+var getSunAngle = function(time, target){
+    var oPos = SunCalc.getPosition(time, target[0], target[1]);
+    // get sunrise azimuth in degrees
+    return ((oPos.azimuth * 180 / Math.PI)-180);
+}
+
+var _findBetween = function () {
+    
+    var aoLine = [oCamera.getLatLng(), oEye.getLatLng()];
+    var fHeading = GeometryUtil.bearing(aoLine[0], aoLine[1]);
+    console.log("fHeading", fHeading);
+    
+    var oDate = new Date();
+
+    var Target = oCamera.getLatLng();
+    var target = [Target.lat, Target.lng];
+    var aSunEvents = [];
+    
+    for (var i = 0; i<365; i++){
+        var newdate = new Date(oDate);
+        newdate.setDate(newdate.getDate() + i);
+        var times = SunCalc.getTimes(newdate, target[0], target[1]);
+        //nsole.log("times", times);
+        //var sSunsetTime = times["sunrise"].toLocaleTimeString());
+        //var sSunsetTime = times["sunset"].toLocaleTimeString());
+        var fSunAngle = getSunAngle(times["sunrise"], target);
+        var fDiff = Math.abs((fSunAngle - fHeading) % 360);
+        
+        var oSunRise = {
+            i:i,
+            event:"sunrise",
+            date:newdate,
+            time:times["sunrise"],
+            sunangle:fSunAngle,
+            diff : fDiff
+        };
+        aSunEvents.push(oSunRise);
+        
+        fSunAngle = getSunAngle(times["sunset"], target);
+        var fDiff = Math.abs((fSunAngle - fHeading) % 360);
+        
+        var oSunSet = {
+            i:i,
+            event:"sunset",
+            date:newdate,
+            time:times["sunset"],
+            sunangle:fSunAngle,
+            diff : fDiff
+        };
+        aSunEvents.push(oSunSet);
+    }
+    
+    aSunEvents.sort(function(a,b){
+        return a.diff - b.diff;
+    });
+    aSunEvents = aSunEvents.slice(0,10);
+    aSunEvents.sort(function(a,b){
+        return a.i - b.i;
+    });
+    
+    console.log(aSunEvents);
+    renderSunTimes(aSunEvents);
+    return true;
+}
+
+var renderSunTimes = function(aSunEvents){
+    var template = require("!ejs-compiled-loader!./sunpositions.ejs");
+    console.log("template", template)
+    var html = template({aSunEvents:aSunEvents});
+    jQuery("#suntimes").html(html);
+    
 }
 
 var drawLine = function () {
@@ -523,7 +598,7 @@ var drawLine = function () {
 
 jQuery("#timedate").val(new Date());
 
-var defaultLatLng = [53.3797, -1.4744];
+var defaultLatLng = [53.38298,-1.46949];
 var oEye = L.marker(defaultLatLng);
 var oCamera = L.marker(defaultLatLng);
 var oEnd = null;
