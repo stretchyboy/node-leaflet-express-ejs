@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-require('dotenv').config();
 
+require('dotenv').config();
+var compression = require('compression')
 var express = require('express');
 var proxy = require('express-http-proxy');
 var morgan = require('morgan')
 
 // get port from environment and store in Express
 var app = express();
-
+app.use(compression());
 app.use(morgan('combined'));
 
 // set the view engine to ejs
