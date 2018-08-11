@@ -7,6 +7,7 @@ const sOutputDir = "/";
 
 module.exports = {
     mode: "development",
+    devtool:"cheap-eval-source-map",
     entry: './src/main.js',
     output: {
         filename: 'main.js',
