@@ -13,17 +13,22 @@
 
     <main>
 
-        <div id="sidebar" class="leaflet-sidebar collapsed">
+        <div id="sidebar" class="leaflet-sidebar">
             <!-- Nav tabs -->
             <div class="leaflet-sidebar-tabs">
                 <ul role="tablist">
-                    <li><a href="#home" role="tab"><i class="fa fa-anchor active"></i></a></li>
-                    <li><a href="#about" role="tab"><i class="fa fa-info"></i></a></li>
+                    <li><a href="#home" role="tab"><i class="fa fa-home active"></i></a></li>
+
+                    <li><a href="#towards" role="tab"><i class="fa fa-eye"></i></a></li>
+                    <li><a href="#from" role="tab"><i class="fa fa-street-view"></i></a></li>
+                    <li><a href="#between" role="tab"><i class="fa fa-arrows-h"></i></a></li>
+                    <li><a href="#when" role="tab"><i class="fa fa-calendar"></i></a></li>
 
                     <li><a href="#camera" role="tab"><i class="fa fa-camera"></i></a></li>
 
                     <!--<li class="disabled"><a href="#messages" role="tab"><i class="fa fa-anchor"></i></a></li>-->
                     <li><a id="zoomToLine"><i class="fa fa-map"></i></a></li>
+
                 </ul>
 
                 <ul role="tablist">
@@ -33,47 +38,182 @@
 
             <!-- Tab panes -->
             <div class="leaflet-sidebar-content">
-                <div class="leaflet-sidebar-pane" id="home">
+                <div class="leaflet-sidebar-pane active" id="home">
                     <h1 class="leaflet-sidebar-header">
-                        Where to Shoot
+                        Where to Shoot?
                         <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
                     </h1>
 
 
-                    <p>Landscape and drone photography planning tools</p>
+                    <h2>Landscape photography planning tools.</h2>
+                    <h3>Features</h3>
+
+                    <ul>
+                        <li>Find where you can setup your camera to shoot a sunset(or sunrise etc.) <a href="#towards">
+                            behind a particular landmark or place</a> (the Eiffel Tower, Angel of the North, your town).</li>
+                        <li>Get an idea of the view from roads that cross that line using Google Street View.</li>
+                        <li data-issue="7">Get an idea of the scope of your possible shots by showing the "Field of View" of your camera and lens combo.</li>
+                        <li data-issue="9">See what you can shoot into a Sunset etc. from a position on a date.</li>
+                        <li data-issue="">What Points of Interest are within your shot?</li>
+                        <li data-issue="17">What area you shot will encompass? Taking into account horizon and hills)</li>
+                        <li data-issue="13">Find out when you can get a Sunset / Sunrise Shot from one spot to a landmark.</li>
+                        <li>Landscape Timelapse Calculations
+                            <ul>
+                                <li data-issue="24">What lense will you need to get the framing right for the Sun at the start of Sunrise to the end of golden hour etc.</li>
+                                <li data-issue="25">What interval you will need for how much video? for what time?</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                </div>
+                <div class="leaflet-sidebar-pane" id="towards">
+                    <h1 class="leaflet-sidebar-header">
+                        What to shoot towards?
+                        <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    </h1>
                     <ul>
                         <li>
-                            Choose a place you want in the centre of your shot (drag <i class="fa fa-camera"></i> or use the search)
+                            Choose a place you want in the centre of your shot (drag <i class="fa fa-eye"></i> or use the search)
                         </li>
                         <li>Choose a time of day and date below</li>
                         <li>The green sections of the line should give you a decent veiw</li>
                         <li>Click <i class="fa fa-street-view "></i> for a view towards the target</li>
                     </ul>
 
-                    <div>
-                        <label>Where are a shooting?</label>
-                        <select id="shootingdirection">
-              <option value="at" selected>Shoot Towards</option>
-              <option value="from">Shoot From</option>
-              <option value="between"  >Shoot Between</option>
-                 </select>
-                    </div>
-
+                    <!--
                     <div>
                         <label>What Event</label>
                         <select id="timetype">
-              <option value="nauticalDawn">Nautical Dawn</option>
-              <option value="dawn">Dawn</option>
-              <option value="sunrise" selected >Sunrise</option>
-              <option value="sunriseEnd" >Sunrise End</option>
-              <option value="goldenHourEnd">End of Dawn Golden Hour</option>
-              
-              <option value="goldenHour">Evening Golden Hour</option>
-              <option value="sunsetStart">Sunset Start</option>
-              <option value="sunset">Sunset</option>
-              <option value="dusk">Dusk</option>
-              <option value="nauticalDusk">Nautical Dusk</option>
-            </select>
+                            <option value="nauticalDawn">Nautical Dawn</option>
+                            <option value="dawn">Dawn</option>
+                            <option value="sunrise" selected >Sunrise</option>
+                            <option value="sunriseEnd" >Sunrise End</option>
+                            <option value="goldenHourEnd">End of Dawn Golden Hour</option>
+
+                            <option value="goldenHour">Evening Golden Hour</option>
+                            <option value="sunsetStart">Sunset Start</option>
+                            <option value="sunset">Sunset</option>
+                            <option value="dusk">Dusk</option>
+                            <option value="nauticalDusk">Nautical Dusk</option>
+                        </select>
+                    </div>
+                    <div>
+
+                        <label>On What Date?</label>
+                        <input id="timedate" type="date" />
+                        <p>
+                            Time <span id="time"></span>
+                        </p>
+                    </div>
+                    -->
+                </div>
+
+
+                <div class="leaflet-sidebar-pane" id="from">
+                    <h1 class="leaflet-sidebar-header">
+                        Where to shoot from?
+                        <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    </h1>
+                    <ul>
+                        <li>
+                            Choose a place you want to set up your camera (Drag <i class="fa fa-camera"></i> or use the search)
+                        </li>
+                        <li>Choose a time of day and date below</li>
+                        <li>The green sections of the line shouldbe visible from where the camera is set up.</li>
+                        <li>Click <i class="fa fa-street-view "></i> for a view towards the target</li>
+                    </ul>
+
+                    <!--
+                    <div>
+                        <label>What Event</label>
+                        <select id="timetype">
+                            <option value="nauticalDawn">Nautical Dawn</option>
+                            <option value="dawn">Dawn</option>
+                            <option value="sunrise" selected >Sunrise</option>
+                            <option value="sunriseEnd" >Sunrise End</option>
+                            <option value="goldenHourEnd">End of Dawn Golden Hour</option>
+
+                            <option value="goldenHour">Evening Golden Hour</option>
+                            <option value="sunsetStart">Sunset Start</option>
+                            <option value="sunset">Sunset</option>
+                            <option value="dusk">Dusk</option>
+                            <option value="nauticalDusk">Nautical Dusk</option>
+                        </select>
+                    </div>
+                    <div>
+
+                        <label>On What Date?</label>
+                        <input id="timedate" type="date" />
+                        <p>
+                            Time <span id="time"></span>
+                        </p>
+                    </div>
+                    -->
+                </div>
+
+
+                <div class="leaflet-sidebar-pane" id="between">
+                    <h1 class="leaflet-sidebar-header">
+                        Shooting between
+                        <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    </h1>
+                    <ul>
+                        <li>
+                            Choose a place you want in the centre of your shot (drag <i class="fa fa-eye"></i> or use the search) and where you want to set your camera up (drag <i class="fa fa-camera">)</i>
+                        </li>
+                        <li>The green sections of the line should give you a decent veiw</li>
+                        <li>Click <i class="fa fa-street-view "></i> for a view towards the target</li>
+                    </ul>
+
+                    <!--
+                    <div>
+                        <label>What Event</label>
+                        <select id="timetype">
+                            <option value="nauticalDawn">Nautical Dawn</option>
+                            <option value="dawn">Dawn</option>
+                            <option value="sunrise" selected >Sunrise</option>
+                            <option value="sunriseEnd" >Sunrise End</option>
+                            <option value="goldenHourEnd">End of Dawn Golden Hour</option>
+
+                            <option value="goldenHour">Evening Golden Hour</option>
+                            <option value="sunsetStart">Sunset Start</option>
+                            <option value="sunset">Sunset</option>
+                            <option value="dusk">Dusk</option>
+                            <option value="nauticalDusk">Nautical Dusk</option>
+                        </select>
+                    </div>
+                    <div>
+
+                        <label>On What Date?</label>
+                        <input id="timedate" type="date" />
+                        <p>
+                            Time <span id="time"></span>
+                        </p>
+                    </div>
+                    -->
+                </div>
+
+                <div class="leaflet-sidebar-pane" id="when">
+                    <h1 class="leaflet-sidebar-header">
+                        When to shoot?
+                        <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    </h1>
+
+                    <div>
+                        <label>What Event?</label>
+                        <select id="timetype">
+                            <option value="nauticalDawn">Nautical Dawn</option>
+                            <option value="dawn">Dawn</option>
+                            <option value="sunrise" selected >Sunrise</option>
+                            <option value="sunriseEnd" >Sunrise End</option>
+                            <option value="goldenHourEnd">End of Dawn Golden Hour</option>
+
+                            <option value="goldenHour">Evening Golden Hour</option>
+                            <option value="sunsetStart">Sunset Start</option>
+                            <option value="sunset">Sunset</option>
+                            <option value="dusk">Dusk</option>
+                            <option value="nauticalDusk">Nautical Dusk</option>
+                        </select>
                     </div>
                     <div>
 
@@ -85,24 +225,16 @@
                     </div>
                 </div>
 
-                <div class="leaflet-sidebar-pane" id="about">
-                    <h1 class="leaflet-sidebar-header">About<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-                    <h2>
-                        Where to Shoot?
-                    </h2>
-
-                    <p>Landscape and drone photography planning tools</p>
-                    <p>
-                        made with <i class="fa fa-heart" aria-hidden="true"></i> in <a href="https://en.wikipedia.org/wiki/Sheffield">Sheffield</a>
-                    </p>
-
-                </div>
-
                 <div class="leaflet-sidebar-pane" id="camera">
                     <h1 class="leaflet-sidebar-header">
                         Camera Views
                         <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
                     </h1>
+                    <div>
+                    <label>Camera Height (m)</label>
+                        <input id="cameraheight" type="number" min="0" max="50" step="0.1" value="1.5" />
+                        
+                    </div>
                     <div>
 
                         <label>Lens Focal Length</label>
@@ -131,7 +263,18 @@
 
 
 
+                <div class="leaflet-sidebar-pane" id="about">
+                    <h1 class="leaflet-sidebar-header">About<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                    <h2>
+                        Where to Shoot?
+                    </h2>
 
+                    <p>Landscape and drone photography planning tools</p>
+                    <p>
+                        made with <i class="fa fa-heart" aria-hidden="true"></i> in <a href="https://en.wikipedia.org/wiki/Sheffield">Sheffield</a>
+                    </p>
+
+                </div>
 
                 <div class="leaflet-sidebar-pane" id="messages">
                     <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
