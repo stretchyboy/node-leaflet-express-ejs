@@ -96,19 +96,19 @@ if (bAuth) {
 
 //https://jjwtay.github.io/Leaflet.draw-box/ target box  drawing
 // TODOS
-    // TODO : save plans
-    // DONE : FOV from the start & end of green sections (done ith same colouring)
-    // DONE : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
-    // TODO : Login/ Register
-    // TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
-    // TODO : Droneflight safety data
-    // TODO : Flightplanning
-    // TODO : Offline first flight/shootoinig plan data (and map flight safety data storage ??)
-    // TODO : pouchdb and couchdb
-    // TODO : Site reece recording
-    // TODO : Will in work on phone / tablet
-    // TODO : cordova if it will
-    // BUG : Dragging seems to break the view line
+// TODO : save plans
+// DONE : FOV from the start & end of green sections (done ith same colouring)
+// DONE : FOV calcuations / tables here https://en.wikipedia.org/wiki/Angle_of_view#Sensor_size_effects_(%22crop_factor%22)
+// TODO : Login/ Register
+// TODO : Change height of view for drone photgraphy (a how high too fly for a view of ???)
+// TODO : Droneflight safety data
+// TODO : Flightplanning
+// TODO : Offline first flight/shootoinig plan data (and map flight safety data storage ??)
+// TODO : pouchdb and couchdb
+// TODO : Site reece recording
+// TODO : Will in work on phone / tablet
+// TODO : cordova if it will
+// BUG : Dragging seems to break the view line
 
 /*Returns the opposite of the triangle defined by 
 the Cameras sensor
@@ -222,7 +222,7 @@ L.control.scale({
 }).addTo(map);
 
 function onLocationFound(e) {
-    if(sShootingDirection=="towards"){
+    if (sShootingDirection == "towards") {
         oEye.setLatLng(e.latlng);
     } else {
         oCamera.setLatLng(e.latlng);
@@ -286,13 +286,22 @@ function getPointsOnLine(map, aLine, steps) {
     return aList;
 }
 
-function getCameraHeight(){
-    
+function getCameraHeight() {
+
     return parseFloat(jQuery("#cameraheight").val());
 }
 
 function drawViewLine(map, oLayer, aLine, iSteps, iDistance, bViewFrom) {
-    var aPoints = getViewLine(map, aLine, iSteps, iDistance, bViewFrom);
+    if (bViewFrom == null) {
+        bViewFrom = false;
+    }
+    
+    var aPoints = [];
+    if(bViewFrom){
+        aPoints = getViewFromLine(map, aLine, iSteps, iDistance);
+    } else {
+        aPoints = getViewTowardsLine(map, aLine, iSteps, iDistance);
+    }
     oLine = L.multiOptionsPolyline(aPoints, {
         multiOptions: {
             optionIdxFn: function (latLng) {
@@ -315,68 +324,111 @@ function drawViewLine(map, oLayer, aLine, iSteps, iDistance, bViewFrom) {
 
     return aPoints;
 }
-    
-    
-function getViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
+
+var bDebugOnce = false;
+
+function getViewFromLine(map, aLine, iSteps, iDistance) {
+    var cameraHeight = getCameraHeight();
+
+    var aPoints = getPointsOnLine(map, aLine, iSteps);
+    var fAngle = 0;
+    var iFromAlt = null;
+    var iStepDist = 1000 * (iDistance / iSteps);
+    var fMaxAngle = -Math.PI / 2;
+    var fMinAngle = Math.PI / 2;
+
+    aPoints = aPoints.map(function (latLng, i) {
+        latLng.alt = getHeightAtPoint(latLng, RGB_Terrain, true);
+        var iDist = 0;
+        var iTerrainHeight = 0;
+        var fTerrainAngle = -Math.PI / 2;
+
+        if (iFromAlt == null) {
+            iFromAlt = latLng.alt + cameraHeight;
+        } else {
+            var iTerrainAlt = latLng.alt;
+            iTerrainHeight = iTerrainAlt - iFromAlt;
+
+            iDist = i * iStepDist;
+            //SOHCAHTOA
+            fTerrainAngle = Math.atan(iTerrainHeight / iDist);
+        }
+
+        latLng.iTerrainHeight = iTerrainHeight;
+        latLng.iDist = iDist;
+        latLng.fTerrainAngle = fTerrainAngle;
+
+        var ViewStatus = VIEW_NONE;
+        if (latLng.fTerrainAngle == fMaxAngle) {
+            ViewStatus = VIEW_POSS;
+        } else if (latLng.fTerrainAngle > fMaxAngle) {
+            ViewStatus = VIEW_YES;
+            fMaxAngle = latLng.fTerrainAngle;
+        }
+
+        latLng.ViewStatus = ViewStatus;
+        return latLng;
+    });
+    return aPoints;
+}
+
+
+function getViewTowardsLine(map, aLine, iSteps, iDistance) {
     var cameraHeight = getCameraHeight();
 
     var aPoints = getPointsOnLine(map, aLine, iSteps);
     var fAngle = 0;
     var iTargetAlt = null;
     var iStepDist = 1000 * (iDistance / iSteps);
-    var fMaxAngle = -Math.PI/2;
-    var fMinAngle = Math.PI/2;
-    if (bViewFrom == null) {
-        bViewFrom = false;
-    }
+    var fMaxAngle = -Math.PI / 2;
+    var fMinAngle = Math.PI / 2;
+    var bViewFrom = false;
+    
 
     aPoints = aPoints.map(function (latLng, i) {
         latLng.alt = getHeightAtPoint(latLng, RGB_Terrain, true);
         var iDist = 0;
+        var iTerrainHeight = 0;
+        var iCameraHeight = 0;
+        var fTerrainAngle = -Math.PI / 2;
+        var fCameraAngle = -Math.PI / 2;
+
         if (iTargetAlt == null) {
-            fAngle = -Math.PI/2;
             iTargetAlt = latLng.alt;
-            if(bViewFrom){
-                iTargetAlt += cameraHeight;
-            }
         } else {
-            var iHeight = latLng.alt - iTargetAlt;
-            if(!bViewFrom){
-                iHeight += cameraHeight;
-            }
+            var iTerrainAlt = latLng.alt;
+            var iCameraAlt = latLng.alt;
+            iCameraAlt += cameraHeight;
+
+            iCameraHeight = iCameraAlt - iTargetAlt;
+            iTerrainHeight = iTerrainAlt - iTargetAlt;
+
             iDist = i * iStepDist
             //SOHCAHTOA
-            fAngle = Math.atan(iHeight / iDist);
+            fCameraAngle = Math.atan(iCameraHeight / iDist);
+            fTerrainAngle = Math.atan(iTerrainHeight / iDist);
         }
-        
+
+        latLng.iTerrainHeight = iTerrainHeight;
+        latLng.iCameraHeight = iCameraHeight;
         latLng.iDist = iDist;
-        latLng.fAngle = fAngle;
-        if (bViewFrom) {
-            
-            var ViewStatus = VIEW_NONE;
-            if (latLng.fAngle == fMaxAngle) {
-                ViewStatus = VIEW_POSS;
-            } else if (latLng.fAngle > fMaxAngle) {
-                ViewStatus = VIEW_YES;
-                fMaxAngle = latLng.fAngle;
-            }
-            
-        } else {
-            var ViewStatus = VIEW_NONE;
-            if (latLng.fAngle == fMaxAngle) {
-                ViewStatus = VIEW_POSS;
-            } else if (latLng.fAngle > fMaxAngle) {
-                ViewStatus = VIEW_YES;
-                fMaxAngle = latLng.fAngle;
-            }
+        latLng.fTerrainAngle = fTerrainAngle;
+        latLng.fCameraAngle = fCameraAngle;
+
+        if (latLng.fTerrainAngle > fMaxAngle) {
+            fMaxAngle = latLng.fTerrainAngle;
         }
+
+        var ViewStatus = VIEW_NONE;
+        if (latLng.fCameraAngle == fMaxAngle) {
+            ViewStatus = VIEW_POSS;
+        } else if (latLng.fCameraAngle > fMaxAngle) {
+            ViewStatus = VIEW_YES;
+        }
+
         latLng.ViewStatus = ViewStatus;
         return latLng;
     });
-
-    var fMaxAngle = 0;
-
-    
 
     return aPoints;
 }
@@ -398,7 +450,7 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     if (sShootingDirection == "from") {
         Target = oCamera.getLatLng();
     }
-    
+
     oLineLayer.clearLayers();
     oConeLayer.clearLayers();
     //var sTimeType = "sunrise";
@@ -407,8 +459,8 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     var times = SunCalc.getTimes(oDate, target[0], target[1]);
     //nsole.log("times", times);
     jQuery("#time").html(times[sTimeType].toLocaleTimeString());
-    
-    
+
+
     var oPos = SunCalc.getPosition(times[sTimeType], target[0], target[1]);
     // get sunrise azimuth in degrees
     var fSunAngle = oPos.azimuth * 180 / Math.PI;
@@ -416,11 +468,7 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     if (sShootingDirection == "from") {
         fSunAngle += 180;
     }
-    
-    
-    
-    
-    
+
     var aLine = getDirectionalLine(target, fSunAngle, iDistance, "red");
     // TODO : put all this info in the sidebar
 
@@ -436,33 +484,38 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
 
     //move camera
     var End = Target;
-    if(aViews.length){
-        End = aViews[aViews.length-1];
+    End.iDist = 0;
+    if (aViews.length) {
+        End = aViews[aViews.length - 1];
     }
     if (sShootingDirection == "towards") {
         oCamera.setLatLng(End);
     } else if (sShootingDirection == "from") {
         oEye.setLatLng(End);
     }
-    
-    
+
+
     var template = require("!ejs-compiled-loader!./linesummary.ejs");
     var localTime = spacetime(times[sTimeType]).in(Target);
-    var html = template({iDistance:aViews[aViews.length-1].iDist, fHeading:fCameraAngle, event:sTimeType, localTime:localTime});
+    var html = template({
+        iDistance: End,
+        fHeading: fCameraAngle,
+        event: sTimeType,
+        localTime: localTime
+    });
     jQuery(".linesummary").html(html);
-    
 
     if (sShootingDirection == "towards") {
-       /* aViews.forEach(function (latLng) {
-            drawCone(aPoints[0], latLng);
-        });*/
+        /* aViews.forEach(function (latLng) {
+             drawCone(aPoints[0], latLng);
+         });*/
 
         window.clearTimeout(iTimer);
         iTimer = window.setTimeout(function () {
             var fHeading = Math.round(fSunAngle + 180) % 360;
             var aRequests = aViews.map(requestStreetViews.bind(this, fHeading, Target));
         }, 100);
-    } else{
+    } else {
         drawCone(oEye.getLatLng(), oCamera.getLatLng());
 
         window.clearTimeout(iTimer);
@@ -470,7 +523,6 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
             requestStreetViews(fSunAngle, aLine[1], aLine[0], oCamera);
         }, 100);
     }
-    
 
     // map that into requests to https://developers.google.com/maps/documentation/streetview/metadata
     // if there is an image available add a pop up (at the location it sends back) pointing back along the line
@@ -478,62 +530,65 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
 }
 
 var requestStreetViews = function (fHeading, lineEnd, latLng, oMarker) {
-            var oParams = {
-                key: process.env.GOOGLE_MAPS_API,
-                location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
-                size: "300x200",
-                heading: fHeading,
-                fov: 120,
-                pitch: 0,
-                radius: 50,
-                source: "outdoor"
-            };
+    var oParams = {
+        key: process.env.GOOGLE_MAPS_API,
+        location: "" + latLng.lat + "," + latLng.lng, //latitude/longitu
+        size: "300x200",
+        heading: fHeading,
+        fov: 120,
+        pitch: 0,
+        radius: 50,
+        source: "outdoor"
+    };
 
-            var sURL = "https://maps.googleapis.com/maps/api/streetview/metadata"; //?parameters
-            return jQuery.getJSON(sURL, oParams,
-                function (data, textStatus) {
-                    if (data.status == "OK") {
-                        var oTweaked = oParams;
-                        oTweaked.location = null;
-                        oTweaked.pano = data.pano_id;
-                        var sImg = "https://maps.googleapis.com/maps/api/streetview?" + jQuery.param(oTweaked);
-                        if(!oMarker){
-                            var oMarker = L.marker(data.location, {
-                                icon: L.icon.fontAwesome({
-                                    iconClasses: 'fa fa-street-view', // you _could_ add other icon classes, not tested.
-                                    //markerColor: '#00a9ce',
-                                    markerColor: '#00cea9',
-                                    iconColor: '#FFF'
-                                })
-                            }).addTo(oLineLayer).on("click", function(evt){
-                            drawCone(lineEnd, latLng);
-                        });
-                        }
-                        
-                        oMarker.bindPopup(L.popup({
-                            minWidth: 300
-                        }).setContent(
-                            '<a target="_blank" href="https://www.google.com/maps/@?api=1&map_action=pano&' +
-                            jQuery.param(oTweaked) + '" >' +
-                            "<img src=\"" + sImg + "\" ></a>"
-                        ));
-                    }
-                });
-        }
+    var sURL = "https://maps.googleapis.com/maps/api/streetview/metadata"; //?parameters
+    return jQuery.getJSON(sURL, oParams,
+        function (data, textStatus) {
+            if (data.status == "OK") {
+                var oTweaked = oParams;
+                oTweaked.location = null;
+                oTweaked.pano = data.pano_id;
+                var sImg = "https://maps.googleapis.com/maps/api/streetview?" + jQuery.param(oTweaked);
+                if (!oMarker) {
+                    var oMarker = L.marker(data.location, {
+                        icon: L.icon.fontAwesome({
+                            iconClasses: 'fa fa-street-view', // you _could_ add other icon classes, not tested.
+                            //markerColor: '#00a9ce',
+                            markerColor: '#00cea9',
+                            iconColor: '#FFF'
+                        })
+                    }).addTo(oLineLayer).on("click", function (evt) {
+                        drawCone(lineEnd, latLng);
+                    });
+                }
+
+                oMarker.bindPopup(L.popup({
+                    minWidth: 300
+                }).setContent(
+                    '<a target="_blank" href="https://www.google.com/maps/@?api=1&map_action=pano&' +
+                    jQuery.param(oTweaked) + '" >' +
+                    "<img src=\"" + sImg + "\" ></a>"
+                ));
+            }
+        });
+}
 
 var _drawBetween = function () {
-    
+
     var aoLine = [oCamera.getLatLng(), oEye.getLatLng()];
-    var aLine = aoLine.map(function(oPoint){
+    var aLine = aoLine.map(function (oPoint) {
         return [oPoint.lat, oPoint.lng];
     });
     var iDistance = aoLine[0].distanceTo(aoLine[1]);
     var fHeading = GeometryUtil.bearing(aoLine[0], aoLine[1]);
-    
-    
+
+
 
     var template = require("!ejs-compiled-loader!./betweensummary.ejs");
-    var html = template({iDistance:iDistance, fHeading:fHeading });
+    var html = template({
+        iDistance: iDistance,
+        fHeading: fHeading
+    });
     jQuery("#betweensummary").html(html);
 
     oLineLayer.clearLayers();
@@ -543,19 +598,19 @@ var _drawBetween = function () {
 
 
     drawCone(aoLine[1], aoLine[0]);
-    
+
     window.clearTimeout(iBetweenTimer);
     iBetweenTimer = window.setTimeout(function () {
         _findBetween();
     }, 100);
-    
-    
-/*
-    window.clearTimeout(iTimer);
-    iTimer = window.setTimeout(function () {
-        requestStreetViews(fHeading,aLine[1], aLine[0], oCamera);
-    }, 100);
-*/
+
+
+    /*
+        window.clearTimeout(iTimer);
+        iTimer = window.setTimeout(function () {
+            requestStreetViews(fHeading,aLine[1], aLine[0], oCamera);
+        }, 100);
+    */
 
 
     // map that into requests to https://developers.google.com/maps/documentation/streetview/metadata
@@ -563,25 +618,25 @@ var _drawBetween = function () {
     return true;
 }
 
-var getSunAngle = function(time, target){
+var getSunAngle = function (time, target) {
     var oPos = SunCalc.getPosition(time, target[0], target[1]);
     // get sunrise azimuth in degrees
-    return ((oPos.azimuth * 180 / Math.PI)-180);
+    return ((oPos.azimuth * 180 / Math.PI) - 180);
 }
 
 var _findBetween = function () {
-    
+
     var aoLine = [oCamera.getLatLng(), oEye.getLatLng()];
     var fHeading = GeometryUtil.bearing(aoLine[0], aoLine[1]);
-    
+
     var oDate = new Date();
 
     var Target = oCamera.getLatLng();
     Target.lon = Target.lng;
     var target = [Target.lat, Target.lng];
     var aSunEvents = [];
-    
-    for (var i = 0; i<365; i++){
+
+    for (var i = 0; i < 365; i++) {
         var newdate = new Date(oDate);
         newdate.setDate(newdate.getDate() + i);
         var times = SunCalc.getTimes(newdate, target[0], target[1]);
@@ -589,61 +644,63 @@ var _findBetween = function () {
         //var sSunsetTime = times["sunset"].toLocaleTimeString());
         var fSunAngle = getSunAngle(times["sunrise"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
-        
-        
+
+
         var dSunRise = spacetime(times["sunrise"]).in(Target);
-        
+
         var oSunRise = {
-            i:i,
-            event:"sunrise",
-            date:newdate,
-            time:times["sunrise"],
-            sunangle:fSunAngle,
+            i: i,
+            event: "sunrise",
+            date: newdate,
+            time: times["sunrise"],
+            sunangle: fSunAngle,
             localTime: dSunRise,
-            diff : fDiff
+            diff: fDiff
         };
         aSunEvents.push(oSunRise);
-        
+
         fSunAngle = getSunAngle(times["sunset"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
         //var dSunSet = tzgeo.tzMoment(Target.lat, Target.lng, times["sunset"]); // moment-timezone obj
         var dSunSet = spacetime(times["sunset"]).in(Target);
         var oSunSet = {
-            i:i,
-            event:"sunset",
-            date:newdate,
-            time:times["sunset"],
-            sunangle:fSunAngle,
+            i: i,
+            event: "sunset",
+            date: newdate,
+            time: times["sunset"],
+            sunangle: fSunAngle,
             localTime: dSunSet,
-            diff : fDiff
+            diff: fDiff
         };
         aSunEvents.push(oSunSet);
     }
-    
-    aSunEvents = aSunEvents.filter(function(a){
-        return a.diff < 10 ;
+
+    aSunEvents = aSunEvents.filter(function (a) {
+        return a.diff < 10;
     });
-    
-    aSunEvents.sort(function(a,b){
+
+    aSunEvents.sort(function (a, b) {
         return a.diff - b.diff;
     });
-    aSunEvents = aSunEvents.slice(0,10);
-    aSunEvents.sort(function(a,b){
+    aSunEvents = aSunEvents.slice(0, 10);
+    aSunEvents.sort(function (a, b) {
         return a.i - b.i;
     });
-    
+
     renderSunTimes(aSunEvents);
     return true;
 }
 
-var renderSunTimes = function(aSunEvents){
+var renderSunTimes = function (aSunEvents) {
     var template = require("!ejs-compiled-loader!./sunpositions.ejs");
-    var html = template({aSunEvents:aSunEvents});
+    var html = template({
+        aSunEvents: aSunEvents
+    });
     jQuery("#suntimes").html(html);
 }
 
 var drawLine = function () {
-    if(sShootingDirection == "between"){
+    if (sShootingDirection == "between") {
         return _drawBetween();
     }
     var sTimeType = jQuery("#timetype").val();
@@ -654,7 +711,7 @@ var drawLine = function () {
 
 jQuery("#timedate").val(new Date());
 
-var defaultLatLng = [53.38298,-1.46949];
+var defaultLatLng = [53.38298, -1.46949];
 var oEye = L.marker(defaultLatLng);
 var oCamera = L.marker(defaultLatLng);
 var oEnd = null;
@@ -719,7 +776,7 @@ sidebar.on('content', function (e) {
         sShootingDirection = e.id;
         drawLine();
     }
-    
+
 });
 
 jQuery("#timetype").on("change", function (evt) {
@@ -741,6 +798,12 @@ jQuery("#lensfl").on("change", function (evt) {
 jQuery("#shootingdirection").on("change", function (evt) {
     drawLine();
 });
+
+jQuery("#cameraheight").on("change", function (evt) {
+    bDebugOnce = true;
+    drawLine();
+});
+
 
 jQuery("#zoomToLine").on("click", function () {
     map.fitBounds(oLine.getBounds(), {
