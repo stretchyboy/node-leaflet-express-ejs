@@ -512,6 +512,13 @@ var _drawBetween = function () {
     });
     var iDistance = aoLine[0].distanceTo(aoLine[1]);
     var fHeading = GeometryUtil.bearing(aoLine[0], aoLine[1]);
+    
+    
+
+    var template = require("!ejs-compiled-loader!./linesummary.ejs");
+    var html = template({iDistance:iDistance, fHeading:fHeading });
+    jQuery("#betweensummary").html(html);
+
     oLineLayer.clearLayers();
     
     var bViewFrom = true;
