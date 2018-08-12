@@ -1,0 +1,17 @@
+<%
+var toTitleCase = function (str) {
+	str = str.toLowerCase().split(' ');
+	for (var i = 0; i < str.length; i++) {
+		str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+	}
+	return str.join(' ');
+};
+%>
+    <p>Line represents
+        <%= toTitleCase(event) %> at
+            <%= localTime.format('time-24h') %> on
+                <%= localTime.format('full-short') %>
+    </p>
+    <p>The longest Distance you can get a shot is
+        <%= Math.round(iDistance/10)/100 %>km with the camera on a heading of
+            <%= Math.round((fHeading+360)%360*10)/10 %>&deg;.</p>
