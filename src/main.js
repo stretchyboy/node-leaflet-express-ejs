@@ -31,7 +31,7 @@ import "Leaflet.MultiOptionsPolyline";
 import "leaflet-fontawesome-markers";
 import "leaflet.locatecontrol";
 import "leaflet-compass/dist/leaflet-compass.src.js";
-
+import "leaflet-providers";
 
 // DONE : Move to full screen map?
 
@@ -176,11 +176,13 @@ var RGB_Terrain = L.tileLayer.colorPicker(
         attribution: '&copy; <a href="https://mapbox.com/">mapbox</a>',
     }).addTo(map);
 
-var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    useCache: true,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+
+/* http://leaflet-extras.github.io/leaflet-providers/preview/index.html */
+var OpenStreetMap_Mapnik = L.tileLayer.provider('OpenStreetMap.Mapnik').addTo(map);
+var MtbMap = L.tileLayer.provider('MtbMap');
+var StamenTerrain = L.tileLayer.provider('Stamen.Terrain');//.addTo(map);
+var OpenTopoMap = L.tileLayer.provider('OpenTopoMap');
+
 
 var OWM_APPID = "448c266078b9dbbd59af7d77257e11be";
 var clouds = L.OWM.clouds({
@@ -202,11 +204,19 @@ var temp = L.OWM.temperature({
 });
 
 
+
 var baseMaps = {
-    "Height Map": RGB_Terrain
+    "OSM Mapnik": OpenStreetMap_Mapnik,
+    "Stamen Terrain":StamenTerrain,
+    "MtbMap":MtbMap,
+    
+    
+    "OpenTopoMap":OpenTopoMap,
+    
 };
 var overlayMaps = {
-    "OSM Mapnik": OpenStreetMap_Mapnik,
+    
+    
     "Clouds": clouds,
     "Wind": wind,
     "Rain": rain,
@@ -438,8 +448,6 @@ var iSteps = 100;
 const VIEW_NONE = 0;
 const VIEW_POSS = 1;
 const VIEW_YES = 2;
-
-
 
 var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     var oDate = new Date();
