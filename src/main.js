@@ -53,6 +53,12 @@ var iTimer = 0;
 var iBetweenTimer = 0;
 var sShootingDirection = "towards";
 
+var defaultLatLng = [53.38298, -1.46949];
+var oEye = L.marker(defaultLatLng);
+var oCamera = L.marker(defaultLatLng);
+var oEnd = null;
+
+
 //https://pouchdb.com/getting-started.html
 //import PouchAuth from "pouchdb-authentication";
 //PouchDB.plugin(PouchAuth);
@@ -209,14 +215,10 @@ var baseMaps = {
     "OSM Mapnik": OpenStreetMap_Mapnik,
     "Stamen Terrain":StamenTerrain,
     "MtbMap":MtbMap,
-    
-    
     "OpenTopoMap":OpenTopoMap,
-    
 };
+
 var overlayMaps = {
-    
-    
     "Clouds": clouds,
     "Wind": wind,
     "Rain": rain,
@@ -716,13 +718,7 @@ var drawLine = function () {
     return _drawLine(sTimeType, sDate, sShootingDirection);
 }
 
-
 jQuery("#timedate").val(new Date());
-
-var defaultLatLng = [53.38298, -1.46949];
-var oEye = L.marker(defaultLatLng);
-var oCamera = L.marker(defaultLatLng);
-var oEnd = null;
 
 setTimeout(function () {
     oEye = L.marker(defaultLatLng, {
@@ -812,6 +808,13 @@ jQuery("#cameraheight").on("change", function (evt) {
     drawLine();
 });
 
+
+jQuery(".openpanel").on("click", function (evt) {
+    var panel = jQuery(evt.target).attr("href").replace("#","")
+    console.log("click", evt, );
+    
+    sidebar.open(panel);
+});
 
 jQuery("#zoomToLine").on("click", function () {
     map.fitBounds(oLine.getBounds(), {
