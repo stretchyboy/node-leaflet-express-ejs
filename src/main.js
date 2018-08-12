@@ -187,7 +187,7 @@ var RGB_Terrain2 = L.tileLayer.colorPicker(
         maxZoom: 15,
         useCache: true,
         attribution: '&copy; <a href="https://mapbox.com/">mapbox</a>',
-        opacity:0.5
+        opacity: 0.5
     });
 
 
@@ -291,7 +291,7 @@ map.addControl(new L.Control.Search({
             oEye.setLatLng(latlng);
             oCamera.setLatLng(latlng);
         }
-        
+
     }
 }));
 
@@ -654,6 +654,12 @@ var getSunAngle = function (time, target) {
     return ((oPos.azimuth * 180 / Math.PI) - 180);
 }
 
+var getMoonAngle = function (time, target) {
+    var oPos = SunCalc.getMoonPosition(time, target[0], target[1]);
+    // get sunrise azimuth in degrees
+    return ((oPos.azimuth * 180 / Math.PI) - 180);
+}
+
 var _findBetween = function () {
 
     var aoLine = [oCamera.getLatLng(), oEye.getLatLng()];
@@ -670,12 +676,12 @@ var _findBetween = function () {
         var newdate = new Date(oDate);
         newdate.setDate(newdate.getDate() + i);
         var times = SunCalc.getTimes(newdate, target[0], target[1]);
+        var moonTimes = SunCalc.getMoonTimes(newdate, target[0], target[1], true);
+        console.log("moonTimes", moonTimes)
         //var sSunsetTime = times["sunrise"].toLocaleTimeString());
         //var sSunsetTime = times["sunset"].toLocaleTimeString());
         var fSunAngle = getSunAngle(times["sunrise"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
-
-
         var dSunRise = spacetime(times["sunrise"]).in(Target);
 
         var oSunRise = {
@@ -703,6 +709,40 @@ var _findBetween = function () {
             diff: fDiff
         };
         aSunEvents.push(oSunSet);
+
+        if (moonTimes["rise"]) {
+            var fMoonAngle = getMoonAngle(moonTimes["rise"], target);
+            var fDiff = Math.abs((fMoonAngle - fHeading) % 360);
+            var dMoonRise = spacetime(moonTimes["rise"]).in(Target);
+
+            var oMoonRise = {
+                i: i,
+                event: "moon rise",
+                date: newdate,
+                time: moonTimes["rise"],
+                sunangle: fMoonAngle,
+                localTime: dMoonRise,
+                diff: fDiff
+            };
+            aSunEvents.push(oMoonRise);
+        }
+
+        if (moonTimes["set"]) {
+            fMoonAngle = getMoonAngle(moonTimes["set"], target);
+            var fDiff = Math.abs((fMoonAngle - fHeading) % 360);
+            //var dMoonSet = tzgeo.tzMoment(Target.lat, Target.lng, times["sunset"]); // moment-timezone obj
+            var dMoonSet = spacetime(moonTimes["set"]).in(Target);
+            var oMoonSet = {
+                i: i,
+                event: "moon set",
+                date: newdate,
+                time: moonTimes["set"],
+                sunangle: fMoonAngle,
+                localTime: dMoonSet,
+                diff: fDiff
+            };
+            aSunEvents.push(oMoonSet);
+        }
     }
 
     aSunEvents = aSunEvents.filter(function (a) {
@@ -712,7 +752,7 @@ var _findBetween = function () {
     aSunEvents.sort(function (a, b) {
         return a.diff - b.diff;
     });
-    aSunEvents = aSunEvents.slice(0, 10);
+    aSunEvents = aSunEvents.slice(0, 20);
     aSunEvents.sort(function (a, b) {
         return a.i - b.i;
     });
