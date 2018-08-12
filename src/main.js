@@ -182,6 +182,14 @@ var RGB_Terrain = L.tileLayer.colorPicker(
         attribution: '&copy; <a href="https://mapbox.com/">mapbox</a>',
     }).addTo(map);
 
+var RGB_Terrain2 = L.tileLayer.colorPicker(
+    'https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1Ijoic3RyZXRjaHlib3kiLCJhIjoiY2pmN3lieDgyMWtpcjJybzQyMDM1MXJ2aiJ9.d3ZCRlRRBklHjvuhHGtmtQ', {
+        maxZoom: 15,
+        useCache: true,
+        attribution: '&copy; <a href="https://mapbox.com/">mapbox</a>',
+        opacity:0.5
+    });
+
 
 /* http://leaflet-extras.github.io/leaflet-providers/preview/index.html */
 var OpenStreetMap_Mapnik = L.tileLayer.provider('OpenStreetMap.Mapnik').addTo(map);
@@ -219,6 +227,7 @@ var baseMaps = {
 };
 
 var overlayMaps = {
+    "RGB Heightmap": RGB_Terrain2,
     "Clouds": clouds,
     "Wind": wind,
     "Rain": rain,
