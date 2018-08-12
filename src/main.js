@@ -677,9 +677,7 @@ var _findBetween = function () {
         newdate.setDate(newdate.getDate() + i);
         var times = SunCalc.getTimes(newdate, target[0], target[1]);
         var moonTimes = SunCalc.getMoonTimes(newdate, target[0], target[1], true);
-        console.log("moonTimes", moonTimes)
-        //var sSunsetTime = times["sunrise"].toLocaleTimeString());
-        //var sSunsetTime = times["sunset"].toLocaleTimeString());
+
         var fSunAngle = getSunAngle(times["sunrise"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
         var dSunRise = spacetime(times["sunrise"]).in(Target);
@@ -697,7 +695,7 @@ var _findBetween = function () {
 
         fSunAngle = getSunAngle(times["sunset"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
-        //var dSunSet = tzgeo.tzMoment(Target.lat, Target.lng, times["sunset"]); // moment-timezone obj
+        
         var dSunSet = spacetime(times["sunset"]).in(Target);
         var oSunSet = {
             i: i,
@@ -821,24 +819,32 @@ setTimeout(function () {
 
 }, 5000);
 
-sidebar.on('content', function (e) {
-    if (e.id == "towards") {
+var setShootingDirection = function(dir) {
+    if (dir == sShootingDirection){
+        return true;
+    }
+    if (dir == "towards") {
         oEye.dragging.enable();
         oCamera.dragging.disable();
-        sShootingDirection = e.id;
-        drawLine();
     }
-    if (e.id == "from") {
+    if (dir == "from") {
         oEye.dragging.disable();
         oCamera.dragging.enable();
-        sShootingDirection = e.id;
-        drawLine();
     }
-    if (e.id == "between") {
+    if (dir == "between") {
         oEye.dragging.enable();
         oCamera.dragging.enable();
-        sShootingDirection = e.id;
-        drawLine();
+
+    }
+    sShootingDirection = dir;
+    drawLine();
+    var allTabs = jQuery("[role='tab']").removeClass("CurrentDirection");
+    var aTab = jQuery("[role='tab'][href='#"+dir+"']").addClass("CurrentDirection");
+}
+
+sidebar.on('content', function (e) {
+    if (["towards", "from", "between"].includes(e.id)) {
+        setShootingDirection(e.id)
     }
 
 });
@@ -871,8 +877,6 @@ jQuery("#cameraheight").on("change", function (evt) {
 
 jQuery(".openpanel").on("click", function (evt) {
     var panel = jQuery(evt.target).attr("href").replace("#", "")
-    console.log("click", evt, );
-
     sidebar.open(panel);
 });
 
