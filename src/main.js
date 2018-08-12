@@ -628,6 +628,7 @@ var oEnd = null;
 setTimeout(function () {
     oEye = L.marker(defaultLatLng, {
         draggable: true,
+        zIndexOffset: 1000,
         icon: L.icon.fontAwesome({
             //iconClasses: 'fa fa-camera', // you _could_ add other icon classes, not tested.
             iconClasses: 'fa fa-eye',
@@ -645,6 +646,7 @@ setTimeout(function () {
 
     oCamera = L.marker(defaultLatLng, {
         draggable: false,
+        zIndexOffset: 1000,
         icon: L.icon.fontAwesome({
             iconClasses: 'fa fa-camera', // you _could_ add other icon classes, not tested.
             markerColor: '#00a9ce',
