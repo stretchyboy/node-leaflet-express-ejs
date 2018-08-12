@@ -132,8 +132,9 @@ function drawCone(lFocus, lStart) {
     //var distanceM = GeometryUtil.distance(map, lStart, lFocus);
     var oppositeM = getCameraOpposite(sensorWidth, focalLength, distanceM);
     var heading = GeometryUtil.bearing(lStart, lFocus);
-    var aPointsL = drawViewLine(map, [lStart, GeometryUtil.destination(lFocus, (heading + 90) % 360, oppositeM)], iSteps, iDistance, true);
-    var aPointsR = drawViewLine(map, [lStart, GeometryUtil.destination(lFocus, (heading - 90) % 360, oppositeM)], iSteps, iDistance, true);
+    oConeLayer.clearLayers();
+    var aPointsL = drawViewLine(map, oConeLayer, [lStart, GeometryUtil.destination(lFocus, (heading + 90) % 360, oppositeM)], iSteps, iDistance, true);
+    var aPointsR = drawViewLine(map, oConeLayer, [lStart, GeometryUtil.destination(lFocus, (heading - 90) % 360, oppositeM)], iSteps, iDistance, true);
 }
 
 //Return array/line from a point at a heading for a distance
@@ -264,6 +265,7 @@ map.addControl(new L.Control.Search({
 map.addControl(new L.Control.Compass());
 
 var oLineLayer = L.layerGroup().addTo(map);
+var oConeLayer = L.layerGroup().addTo(map);
 
 var sidebar = L.control.sidebar({
     autopan: false, // whether to maintain the centered map point when opening the sidebar
@@ -288,7 +290,33 @@ function getCameraHeight(){
     return parseFloat(jQuery("#cameraheight").val());
 }
 
-function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
+function drawViewLine(map, oLayer, aLine, iSteps, iDistance, bViewFrom) {
+    var aPoints = getViewLine(map, aLine, iSteps, iDistance, bViewFrom);
+    oLine = L.multiOptionsPolyline(aPoints, {
+        multiOptions: {
+            optionIdxFn: function (latLng) {
+                return latLng.ViewStatus;
+            },
+            options: [
+                {
+                    color: '#FF0000AA'
+                }, {
+                    color: '#0000FFAA'
+                }, {
+                    color: '#00FF00AA'
+                }]
+        },
+        weight: 5,
+        lineCap: 'butt',
+        opacity: 0.75,
+        smoothFactor: 1
+    }).addTo(oLayer);
+
+    return aPoints;
+}
+    
+    
+function getViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
     var cameraHeight = getCameraHeight();
 
     var aPoints = getPointsOnLine(map, aLine, iSteps);
@@ -345,26 +373,7 @@ function drawViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
 
     var fMaxAngle = 0;
 
-    oLine = L.multiOptionsPolyline(aPoints, {
-        multiOptions: {
-            optionIdxFn: function (latLng) {
-                return latLng.ViewStatus;
-            },
-            options: [
-                {
-                    color: '#FF0000AA'
-                }, {
-                    color: '#0000FFAA'
-                }, {
-                    color: '#00FF00AA'
-                }]
-        },
-        weight: 5,
-        lineCap: 'butt',
-        opacity: 0.75,
-        smoothFactor: 1
-    }).addTo(oLineLayer);
-
+    
 
     return aPoints;
 }
@@ -388,6 +397,7 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     }
     
     oLineLayer.clearLayers();
+    oConeLayer.clearLayers();
     //var sTimeType = "sunrise";
     var target = [Target.lat, Target.lng];
     // TODO : Drawsunset as well
@@ -409,7 +419,7 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
 
     var bViewFrom = (sShootingDirection == "from");
     // DONE : Draw graph or a heatline indicating where you should be able to see the target from
-    var aPoints = drawViewLine(map, aLine, iSteps, iDistance, bViewFrom);
+    var aPoints = drawViewLine(map, oLineLayer, aLine, iSteps, iDistance, bViewFrom);
 
     // TODO : Get google streetview of that point in the right direction
     // take filtered copy of aPoints where  l
@@ -505,7 +515,7 @@ var _drawBetween = function () {
     oLineLayer.clearLayers();
     
     var bViewFrom = true;
-    var aPoints = drawViewLine(map, aLine, iSteps, iDistance, bViewFrom);
+    var aPoints = drawViewLine(map, oLineLayer, aLine, iSteps, iDistance, bViewFrom);
 
 
     drawCone(aoLine[1], aoLine[0]);
