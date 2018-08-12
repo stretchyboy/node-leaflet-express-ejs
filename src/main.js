@@ -50,6 +50,7 @@ import "leaflet-compass/dist/leaflet-compass.src.css";
 
 var bAuth = false;
 var iTimer = 0;
+var iBetweenTimer = 0;
 var sShootingDirection = "towards";
 
 //https://pouchdb.com/getting-started.html
@@ -331,6 +332,7 @@ function getViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
 
     aPoints = aPoints.map(function (latLng, i) {
         latLng.alt = getHeightAtPoint(latLng, RGB_Terrain, true);
+        var iDist = 0;
         if (iTargetAlt == null) {
             fAngle = -Math.PI/2;
             iTargetAlt = latLng.alt;
@@ -342,11 +344,12 @@ function getViewLine(map, aLine, iSteps, iDistance, bViewFrom) {
             if(!bViewFrom){
                 iHeight += cameraHeight;
             }
-            var iDist = i * iStepDist
+            iDist = i * iStepDist
             //SOHCAHTOA
             fAngle = Math.atan(iHeight / iDist);
         }
-
+        
+        latLng.iDist = iDist;
         latLng.fAngle = fAngle;
         if (bViewFrom) {
             
@@ -409,11 +412,15 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     var oPos = SunCalc.getPosition(times[sTimeType], target[0], target[1]);
     // get sunrise azimuth in degrees
     var fSunAngle = oPos.azimuth * 180 / Math.PI;
-    
+    var fCameraAngle = fSunAngle + 180;
     if (sShootingDirection == "from") {
         fSunAngle += 180;
     }
-
+    
+    
+    
+    
+    
     var aLine = getDirectionalLine(target, fSunAngle, iDistance, "red");
     // TODO : put all this info in the sidebar
 
@@ -428,12 +435,22 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     });
 
     //move camera
-    if (sShootingDirection == "towards") {
-        oCamera.setLatLng(aViews[aViews.length-1]);
-    } else if (sShootingDirection == "from") {
-        oEye.setLatLng(aViews[aViews.length-1]);
+    var End = Target;
+    if(aViews.length){
+        End = aViews[aViews.length-1];
     }
-
+    if (sShootingDirection == "towards") {
+        oCamera.setLatLng(End);
+    } else if (sShootingDirection == "from") {
+        oEye.setLatLng(End);
+    }
+    
+    
+    var template = require("!ejs-compiled-loader!./linesummary.ejs");
+    var localTime = spacetime(times[sTimeType]).in(Target);
+    var html = template({iDistance:aViews[aViews.length-1].iDist, fHeading:fCameraAngle, event:sTimeType, localTime:localTime});
+    jQuery(".linesummary").html(html);
+    
 
     if (sShootingDirection == "towards") {
        /* aViews.forEach(function (latLng) {
@@ -515,7 +532,7 @@ var _drawBetween = function () {
     
     
 
-    var template = require("!ejs-compiled-loader!./linesummary.ejs");
+    var template = require("!ejs-compiled-loader!./betweensummary.ejs");
     var html = template({iDistance:iDistance, fHeading:fHeading });
     jQuery("#betweensummary").html(html);
 
@@ -527,8 +544,8 @@ var _drawBetween = function () {
 
     drawCone(aoLine[1], aoLine[0]);
     
-    window.clearTimeout(iTimer);
-    iTimer = window.setTimeout(function () {
+    window.clearTimeout(iBetweenTimer);
+    iBetweenTimer = window.setTimeout(function () {
         _findBetween();
     }, 100);
     
@@ -556,11 +573,11 @@ var _findBetween = function () {
     
     var aoLine = [oCamera.getLatLng(), oEye.getLatLng()];
     var fHeading = GeometryUtil.bearing(aoLine[0], aoLine[1]);
-    console.log("fHeading", fHeading);
     
     var oDate = new Date();
 
     var Target = oCamera.getLatLng();
+    Target.lon = Target.lng;
     var target = [Target.lat, Target.lng];
     var aSunEvents = [];
     
@@ -572,8 +589,8 @@ var _findBetween = function () {
         //var sSunsetTime = times["sunset"].toLocaleTimeString());
         var fSunAngle = getSunAngle(times["sunrise"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
-        //var dSunRise = tzgeo.tzMoment(Target.lat, Target.lng, times["sunrise"]); // moment-timezone obj
-        //Target.lon = Target.lng;
+        
+        
         var dSunRise = spacetime(times["sunrise"]).in(Target);
         
         var oSunRise = {
@@ -645,7 +662,7 @@ var oEnd = null;
 setTimeout(function () {
     oEye = L.marker(defaultLatLng, {
         draggable: true,
-        zIndexOffset: 1000,
+        zIndexOffset: 1100,
         icon: L.icon.fontAwesome({
             //iconClasses: 'fa fa-camera', // you _could_ add other icon classes, not tested.
             iconClasses: 'fa fa-eye',
