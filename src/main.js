@@ -186,7 +186,7 @@ var RGB_Terrain = L.tileLayer.colorPicker(
 /* http://leaflet-extras.github.io/leaflet-providers/preview/index.html */
 var OpenStreetMap_Mapnik = L.tileLayer.provider('OpenStreetMap.Mapnik').addTo(map);
 var MtbMap = L.tileLayer.provider('MtbMap');
-var StamenTerrain = L.tileLayer.provider('Stamen.Terrain');//.addTo(map);
+var StamenTerrain = L.tileLayer.provider('Stamen.Terrain'); //.addTo(map);
 var OpenTopoMap = L.tileLayer.provider('OpenTopoMap');
 
 
@@ -213,9 +213,9 @@ var temp = L.OWM.temperature({
 
 var baseMaps = {
     "OSM Mapnik": OpenStreetMap_Mapnik,
-    "Stamen Terrain":StamenTerrain,
-    "MtbMap":MtbMap,
-    "OpenTopoMap":OpenTopoMap,
+    "Stamen Terrain": StamenTerrain,
+    "MtbMap": MtbMap,
+    "OpenTopoMap": OpenTopoMap,
 };
 
 var overlayMaps = {
@@ -271,7 +271,18 @@ map.addControl(new L.Control.Search({
     autoType: false,
     minLength: 2,
     moveToLocation: function (latlng, title, oMap) {
-        oEye.setLatLng(latlng);
+        oMap.panTo(latlng);
+        if (sShootingDirection == "towards") {
+            oEye.setLatLng(latlng);
+        }
+        if (sShootingDirection == "from") {
+            oCamera.setLatLng(latlng);
+        }
+        if (sShootingDirection == "between") {
+            oEye.setLatLng(latlng);
+            oCamera.setLatLng(latlng);
+        }
+        
     }
 }));
 
@@ -307,9 +318,9 @@ function drawViewLine(map, oLayer, aLine, iSteps, iDistance, bViewFrom) {
     if (bViewFrom == null) {
         bViewFrom = false;
     }
-    
+
     var aPoints = [];
-    if(bViewFrom){
+    if (bViewFrom) {
         aPoints = getViewFromLine(map, aLine, iSteps, iDistance);
     } else {
         aPoints = getViewTowardsLine(map, aLine, iSteps, iDistance);
@@ -395,7 +406,7 @@ function getViewTowardsLine(map, aLine, iSteps, iDistance) {
     var fMaxAngle = -Math.PI / 2;
     var fMinAngle = Math.PI / 2;
     var bViewFrom = false;
-    
+
 
     aPoints = aPoints.map(function (latLng, i) {
         latLng.alt = getHeightAtPoint(latLng, RGB_Terrain, true);
@@ -602,7 +613,7 @@ var _drawBetween = function () {
     jQuery("#betweensummary").html(html);
 
     oLineLayer.clearLayers();
-    
+
     var bViewFrom = true;
     var aPoints = drawViewLine(map, oLineLayer, aLine, iSteps, iDistance, bViewFrom);
 
@@ -753,7 +764,7 @@ setTimeout(function () {
         if (sShootingDirection == "towards") {
             return true;
         }
-        drawLine();
+        return drawLine();
     });
 
 
@@ -810,9 +821,9 @@ jQuery("#cameraheight").on("change", function (evt) {
 
 
 jQuery(".openpanel").on("click", function (evt) {
-    var panel = jQuery(evt.target).attr("href").replace("#","")
+    var panel = jQuery(evt.target).attr("href").replace("#", "")
     console.log("click", evt, );
-    
+
     sidebar.open(panel);
 });
 
