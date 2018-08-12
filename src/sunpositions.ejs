@@ -1,27 +1,45 @@
 <%
-  var options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+var toTitleCase = function (str) {
+	str = str.toLowerCase().split(' ');
+	for (var i = 0; i < str.length; i++) {
+		str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+	}
+	return str.join(' ');
+};
 %>
-<table>
-    <tr>
-        <th>Event</th>
-        <th>Date </th>
-        <th>Time</th>
-        <th>Difference</th>
-    </tr>
-    <% aSunEvents.forEach(function(event){ %>
-        <tr>
-            <td>
-                <%= event.event %>
-            </td>
-            <td>
-                <%= event.date.toLocaleDateString('en-GB', options) %>
-            </td>
-            <td>
-                <%= event.time.toLocaleTimeString('en-GB') %>
-            </td>
-            <td>
-                <%= Math.round(event.diff * 100)/100 %>&deg;
-            </td>
-        </tr>
-        <% }); %>
-</table>
+
+    <% if (aSunEvents.length) { %>
+        <h3>Next dates and times for dramatic views between these points</h3>
+
+        <table>
+            <tr>
+                <th>Event</th>
+                <th>Date </th>
+                <th>Time</th>
+                <th>Difference</th>
+            </tr>
+            <% aSunEvents.forEach(function(event){ %>
+                <tr>
+                    <td>
+                        <%= toTitleCase(event.event) %>
+                    </td>
+                    <td>
+                        <%= event.localTime.format('full-short') %>
+
+                    </td>
+                    <td>
+                        <%= event.localTime.format('time-24h') %>
+
+                    </td>
+                    <td>
+                        <%= Math.round(event.diff * 100)/100 %>&deg;
+                    </td>
+                </tr>
+                <% }); %>
+        </table>
+        <p>Times are local to the timezone
+            <%= aSunEvents[0].localTime.timezone().name  %>
+        </p>
+        <% } else { %>
+            <h3>Unfortunately there are no events that fall with 10&deg; of this line</h3>
+            <% } %>

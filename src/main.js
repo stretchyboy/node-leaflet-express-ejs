@@ -6,6 +6,17 @@ import SunCalc from "suncalc";
 import morgan from 'morgan';
 import LatLon from "mt-latlon";
 
+
+const spacetime = require('spacetime')
+const geo = require('spacetime-geo')
+//apply the plugin
+spacetime.extend(geo)
+/*
+import 'spacetime';
+import 'spacetime-geo'
+//apply the plugin
+spacetime.extend(spacetime-geo);*/
+
 //import proxy from 'express-http-proxy';
 
 import PouchDB from "pouchdb";
@@ -499,7 +510,12 @@ var _drawBetween = function () {
 
     drawCone(aoLine[1], aoLine[0]);
     
-    _findBetween();
+    window.clearTimeout(iTimer);
+    iTimer = window.setTimeout(function () {
+        _findBetween();
+    }, 100);
+    
+    
 /*
     window.clearTimeout(iTimer);
     iTimer = window.setTimeout(function () {
@@ -535,11 +551,13 @@ var _findBetween = function () {
         var newdate = new Date(oDate);
         newdate.setDate(newdate.getDate() + i);
         var times = SunCalc.getTimes(newdate, target[0], target[1]);
-        //nsole.log("times", times);
         //var sSunsetTime = times["sunrise"].toLocaleTimeString());
         //var sSunsetTime = times["sunset"].toLocaleTimeString());
         var fSunAngle = getSunAngle(times["sunrise"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
+        //var dSunRise = tzgeo.tzMoment(Target.lat, Target.lng, times["sunrise"]); // moment-timezone obj
+        //Target.lon = Target.lng;
+        var dSunRise = spacetime(times["sunrise"]).in(Target);
         
         var oSunRise = {
             i:i,
@@ -547,23 +565,30 @@ var _findBetween = function () {
             date:newdate,
             time:times["sunrise"],
             sunangle:fSunAngle,
+            localTime: dSunRise,
             diff : fDiff
         };
         aSunEvents.push(oSunRise);
         
         fSunAngle = getSunAngle(times["sunset"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
-        
+        //var dSunSet = tzgeo.tzMoment(Target.lat, Target.lng, times["sunset"]); // moment-timezone obj
+        var dSunSet = spacetime(times["sunset"]).in(Target);
         var oSunSet = {
             i:i,
             event:"sunset",
             date:newdate,
             time:times["sunset"],
             sunangle:fSunAngle,
+            localTime: dSunSet,
             diff : fDiff
         };
         aSunEvents.push(oSunSet);
     }
+    
+    aSunEvents = aSunEvents.filter(function(a){
+        return a.diff < 10 ;
+    });
     
     aSunEvents.sort(function(a,b){
         return a.diff - b.diff;
@@ -573,17 +598,14 @@ var _findBetween = function () {
         return a.i - b.i;
     });
     
-    console.log(aSunEvents);
     renderSunTimes(aSunEvents);
     return true;
 }
 
 var renderSunTimes = function(aSunEvents){
     var template = require("!ejs-compiled-loader!./sunpositions.ejs");
-    console.log("template", template)
     var html = template({aSunEvents:aSunEvents});
     jQuery("#suntimes").html(html);
-    
 }
 
 var drawLine = function () {
