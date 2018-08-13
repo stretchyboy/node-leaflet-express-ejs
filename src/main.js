@@ -699,7 +699,7 @@ var _findBetween = function () {
 
         fSunAngle = getSunAngle(times["sunset"], target);
         var fDiff = Math.abs((fSunAngle - fHeading) % 360);
-        
+
         var dSunSet = spacetime(times["sunset"]).in(Target);
         var oSunSet = {
             i: i,
@@ -823,8 +823,8 @@ setTimeout(function () {
 
 }, 5000);
 
-var setShootingDirection = function(dir) {
-    if (dir == sShootingDirection){
+var setShootingDirection = function (dir) {
+    if (dir == sShootingDirection) {
         return true;
     }
     if (dir == "towards") {
@@ -843,7 +843,7 @@ var setShootingDirection = function(dir) {
     sShootingDirection = dir;
     drawLine();
     var allTabs = jQuery("[role='tab']").removeClass("CurrentDirection");
-    var aTab = jQuery("[role='tab'][href='#"+dir+"']").addClass("CurrentDirection");
+    var aTab = jQuery("[role='tab'][href='#" + dir + "']").addClass("CurrentDirection");
 }
 
 sidebar.on('content', function (e) {
@@ -866,7 +866,7 @@ jQuery("#cameras").on("change", function (evt) {
 });
 
 jQuery("#lensfl").on("change", function (evt) {
-    
+
     jQuery("#lensfl_val").html(jQuery("#lensfl").val())
     drawLine();
 });
@@ -893,48 +893,66 @@ jQuery("#zoomToLine").on("click", function () {
 })
 
 var bTlDirty = true;
-var setDirty = function(){
+var setDirty = function () {
     bTlDirty = true;
 }
 
-var timelapse = Bind({
-    interval: 5,
-    shoot_mins: 10,
-    frames: 120,
-    FPS: 15,
-    play_secs: 8
-}, {
- interval: {
-     "dom":'input[name="interval"]',
-     "callback":setDirty
- },
-    shoot_mins:  {
-     "dom":'input[name="shoot_mins"]',
-     "callback":setDirty
- },
-    frames:  {
-     "dom":'input[name="frames"]',
-     "callback":setDirty
- },
-    FPS:  {
-     "dom":'input[name="FPS"]',
-     "callback":setDirty
- },
-    play_secs:  {
-     "dom":'input[name="play_secs"]',
-     "callback":setDirty
- }
-});
+var saveDB = new PouchDB('savedata');
 
-var tl_recalc = function(){
-    if(!bTlDirty){
+saveDB.get('current_timelapse').catch(function (err) {
+        return saveDB.put({
+            _id: "current_timelapse",
+            interval: 5,
+            shoot_mins: 10,
+            frames: 120,
+            FPS: 15,
+            play_secs: 8
+        }).then(function(){
+            return saveDB.get('current_timelapse');
+        });
+    })
+    .then(function(doc){
+        console.log("current_timelapse", doc);
+        createBind(doc);
+    });
+
+
+
+var timelapse = {};
+var createBind = function (oModel) {
+    timelapse = Bind(oModel, {
+        interval: {
+            "dom": 'input[name="interval"]',
+            "callback": setDirty
+        },
+        shoot_mins: {
+            "dom": 'input[name="shoot_mins"]',
+            "callback": setDirty
+        },
+        frames: {
+            "dom": 'input[name="frames"]',
+            "callback": setDirty
+        },
+        FPS: {
+            "dom": 'input[name="FPS"]',
+            "callback": setDirty
+        },
+        play_secs: {
+            "dom": 'input[name="play_secs"]',
+            "callback": setDirty
+        }
+    });
+}
+
+var tl_recalc = function () {
+    if (!bTlDirty) {
         return;
     }
-    var calcID = jQuery('input[name="tl_calc"]:checked').val(); 
-    switch(calcID){
+    var calcID = jQuery('input[name="tl_calc"]:checked').val();
+    switch (calcID) {
         case "FPS":
         case "play_secs":
-            
+
             timelapse.frames = Math.round(timelapse.shoot_mins * 60 / timelapse.interval);
             break;
         case "interval":
@@ -942,24 +960,27 @@ var tl_recalc = function(){
             timelapse.frames = Math.round(timelapse.FPS * timelapse.play_secs);
             break;
     }
-    
-    switch(calcID){
-         case "interval":
-            timelapse.interval = Math,round((timelapse.shoot_mins * 60)/ timelapse.frames);
+
+    switch (calcID) {
+        case "interval":
+            timelapse.interval = Math, round((timelapse.shoot_mins * 60) / timelapse.frames);
             break;
-         case "shoot_mins":
+        case "shoot_mins":
             timelapse.shoot_mins = Math.ceil(timelapse.frames * timelapse.interval / 60);
-            break; 
-         case "FPS":
+            break;
+        case "FPS":
             timelapse.FPS = Math.round(timelapse.frames / timelapse.play_secs);
             break;
-         case "play_secs":
-            timelapse.play_secs = Math.floor(timelapse.frames *10 / timelapse.FPS)/10;
+        case "play_secs":
+            timelapse.play_secs = Math.floor(timelapse.frames * 10 / timelapse.FPS) / 10;
             break;
     }
+    saveDB.put(timelapse.__export()).then(function(res){
+        timelapse._rev = res.rev;
+        console.log(res);
+    });
     
     bTlDirty = false;
 };
 
 setInterval(tl_recalc, 1000);
-    
