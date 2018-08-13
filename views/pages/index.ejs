@@ -170,8 +170,19 @@
                     </div>
                     <div>
 
-                        <label>Lens Focal Length</label>
-                        <select id="lensfl">
+                        <label>Lens Focal Length (<span id="lensfl_val"></span>mm)</label>
+                        <input type="range" id="lensfl" list="LenseMaxes" max="600">
+                        <datalist id="LenseMaxes">
+                            <option value="25">25mm</option>
+                            <option value="35">35mm</option>
+                            <option value="50"  >50mm</option>
+                            <option value="100" >100mm</option>
+                            <option value="200">200mm</option>
+
+                            <option value="300">300mm</option>
+                            <option value="500">500mm</option>
+                        </datalist>
+                        <!--<select id="lensfl">
                             <option value="none" selected >Select One</option>
                             <option value="25">25mm</option>
                             <option value="35">35mm</option>
@@ -181,7 +192,7 @@
 
                             <option value="300">300mm</option>
                             <option value="500">500mm</option>
-                        </select>
+                        </select>-->
                     </div>
 
                     <div>

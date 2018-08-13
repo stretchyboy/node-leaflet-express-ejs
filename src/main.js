@@ -866,6 +866,8 @@ jQuery("#cameras").on("change", function (evt) {
 });
 
 jQuery("#lensfl").on("change", function (evt) {
+    
+    jQuery("#lensfl_val").html(jQuery("#lensfl").val())
     drawLine();
 });
 
