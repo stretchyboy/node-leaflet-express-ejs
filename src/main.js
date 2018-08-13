@@ -135,7 +135,9 @@ function drawCone(lFocus, lStart) {
         return true;
     }
     var focalLength = fl * (1 / 1000);
-    var sensorWidth = jQuery("#camerasw").val() * (1 / 1000);
+    var sensorSize = jQuery("#cameras").val()
+    var senorDims = sensorSize.split("x");
+    var sensorWidth = senorDims[0] * (1 / 1000);
 
     var distanceM = lStart.distanceTo(lFocus);
     //var distanceM = GeometryUtil.distance(map, lStart, lFocus);
@@ -859,7 +861,7 @@ jQuery("#timedate").on("change", function (evt) {
     drawLine();
 });
 
-jQuery("#camerasw").on("change", function (evt) {
+jQuery("#cameras").on("change", function (evt) {
     drawLine();
 });
 

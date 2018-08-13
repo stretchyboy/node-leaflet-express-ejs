@@ -63,7 +63,7 @@
                             <a class="openpanel" href="#between">one spot to another</a>.</li>
                         <li>Landscape Timelapse Calculations
                             <ul>
-                                <li data-issue="25">What <a class="openpanel" href="#timelapse" >timelapse interval</a> you will need for how much video? for what time?</li>
+                                <li data-issue="25">What <a class="openpanel" href="#timelapse">timelapse interval</a> you will need for how much video? for what time?</li>
                                 <!--
                                      <li data-issue="24">What lense will you need to get the framing right for the Sun at the start of Sunrise to the end of golden hour etc.</li>
                                 -->
@@ -173,25 +173,35 @@
                         <label>Lens Focal Length</label>
                         <select id="lensfl">
                             <option value="none" selected >Select One</option>
-              <option value="25">25mm</option>
-              <option value="35">35mm</option>
-              <option value="50"  >50mm</option>
-              <option value="100" >100mm</option>
-              <option value="200">200mm</option>
-              
-              <option value="300">300mm</option>
-              <option value="500">500mm</option>
-            </select>
-                    </div>
-                    <div>
+                            <option value="25">25mm</option>
+                            <option value="35">35mm</option>
+                            <option value="50"  >50mm</option>
+                            <option value="100" >100mm</option>
+                            <option value="200">200mm</option>
 
-                        <label>Camera Sensor Width</label>
-                        <select id="camerasw">
-              <option value="25">25mm</option>
-              <option value="36" selected >36mm</option>
-              <option value="50"  >50mm</option>
-            </select>
+                            <option value="300">300mm</option>
+                            <option value="500">500mm</option>
+                        </select>
                     </div>
+
+                    <div>
+                        <label>Camera Sensor</label>
+                        <select id="cameras">
+                            <option value="36x24">35mm Full Frame</option>
+                            <option value="28.7x19"  >APS - H (Canon)</option>
+                            <option value="22.2x14.8" selected >APS - C (Canon)</option>
+                            <option value="23.6x15.7"  >APS - C (not Canon)</option>
+
+                            <option value="20.7x13.8">Foveon (Sigma)</option>
+                            <option value="17.3x13"  >Four Thirds (Olympus, Panasonic)</option>
+                            <option value="13.2X8.8"  >1' (Nikon Sony)</option>
+                            <option value="8.6x6.6"  >2/3' (Fuji, Nokia)</option>
+
+                            <option value="7.6x5.7"  >1/1.7'</option>
+                            <option value="5.76x4.29"  >1/2.5'</option>        
+                        </select>
+                    </div>
+
                 </div>
 
                 <div class="leaflet-sidebar-pane" id="timelapse">
@@ -200,25 +210,25 @@
                         Select the radio button to the right of the amount to are interested in calculating.
                     </p>
                     <div>
-                        <label>Interval between shots (secs)</label><input name="interval" type="number" min="1"/>
+                        <label>Interval between shots (secs)</label><input name="interval" type="number" min="1" />
                         <input type="radio" name="tl_calc" value="interval" />
                     </div>
                     <div>
-                        <label>Shooting Duration (mins)</label><input name="shoot_mins" type="number" min="1"   />
+                        <label>Shooting Duration (mins)</label><input name="shoot_mins" type="number" min="1" />
                         <input type="radio" name="tl_calc" value="shoot_mins" />
                     </div>
                     <div>
-                        <label>Frames To Shoot</label><input name="frames" type="number" min="1"  />
+                        <label>Frames To Shoot</label><input name="frames" type="number" min="1" />
                     </div>
 
                     <div>
                         <label>Playback FPS 
                         </label><input name="FPS" list="fpses" type="number" />
-                        
+
                     </div>
-                    
-                
-                    
+
+
+
                     <div>
                         <label>Playback Duration (secs)</label><input name="play_secs" type="number" steps="0.1" />
                         <input type="radio" name="tl_calc" value="play_secs" checked />
