@@ -9,6 +9,7 @@ import LatLon from "mt-latlon";
 
 const spacetime = require('spacetime')
 const geo = require('spacetime-geo')
+const Bind = require("bind.js");
 //apply the plugin
 spacetime.extend(geo)
 /*
@@ -35,7 +36,8 @@ import "leaflet-providers";
 
 // DONE : Move to full screen map?
 
-import "font-awesome/css/font-awesome.css";
+//import "font-awesome/css/font-awesome.css";
+import "@fortawesome/fontawesome-free/css/all.css";
 //import "bootstrap/dist/css/bootstrap.css";
 import "leaflet/dist/leaflet.css";
 import "leaflet-search/dist/leaflet-search.min.css";
@@ -885,3 +887,75 @@ jQuery("#zoomToLine").on("click", function () {
         padding: [20, 20]
     });
 })
+
+var bTlDirty = true;
+var setDirty = function(){
+    bTlDirty = true;
+}
+
+var timelapse = Bind({
+    interval: 5,
+    shoot_mins: 10,
+    frames: 120,
+    FPS: 15,
+    play_secs: 8
+}, {
+ interval: {
+     "dom":'input[name="interval"]',
+     "callback":setDirty
+ },
+    shoot_mins:  {
+     "dom":'input[name="shoot_mins"]',
+     "callback":setDirty
+ },
+    frames:  {
+     "dom":'input[name="frames"]',
+     "callback":setDirty
+ },
+    FPS:  {
+     "dom":'input[name="FPS"]',
+     "callback":setDirty
+ },
+    play_secs:  {
+     "dom":'input[name="play_secs"]',
+     "callback":setDirty
+ }
+});
+
+var tl_recalc = function(){
+    if(!bTlDirty){
+        return;
+    }
+    var calcID = jQuery('input[name="tl_calc"]:checked').val(); 
+    switch(calcID){
+        case "FPS":
+        case "play_secs":
+            
+            timelapse.frames = Math.round(timelapse.shoot_mins * 60 / timelapse.interval);
+            break;
+        case "interval":
+        case "shoot_mins":
+            timelapse.frames = Math.round(timelapse.FPS * timelapse.play_secs);
+            break;
+    }
+    
+    switch(calcID){
+         case "interval":
+            timelapse.interval = Math,round((timelapse.shoot_mins * 60)/ timelapse.frames);
+            break;
+         case "shoot_mins":
+            timelapse.shoot_mins = Math.ceil(timelapse.frames * timelapse.interval / 60);
+            break; 
+         case "FPS":
+            timelapse.FPS = Math.round(timelapse.frames / timelapse.play_secs);
+            break;
+         case "play_secs":
+            timelapse.play_secs = Math.floor(timelapse.frames *10 / timelapse.FPS)/10;
+            break;
+    }
+    
+    bTlDirty = false;
+};
+
+setInterval(tl_recalc, 1000);
+    

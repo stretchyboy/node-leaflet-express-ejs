@@ -21,10 +21,11 @@
 
                     <li><a href="#towards" role="tab" class="CurrentDirection"><i class="fa fa-eye"></i></a></li>
                     <li><a href="#from" role="tab"><i class="fa fa-street-view"></i></a></li>
-                    <li><a href="#between" role="tab"><i class="fa fa-arrows-h"></i></a></li>
-                    <li><a href="#when" role="tab"><i class="fa fa-calendar"></i></a></li>
+                    <li><a href="#between" role="tab"><i class="fa fa-arrows-alt-h"></i></a></li>
+                    <li><a href="#when" role="tab"><i class="fa fa-calendar-alt"></i></a></li>
 
                     <li><a href="#camera" role="tab"><i class="fa fa-camera"></i></a></li>
+                    <li><a href="#timelapse" role="tab"><i class="fa fa-stopwatch"></i></a></li>
 
                     <!--<li class="disabled"><a href="#messages" role="tab"><i class="fa fa-anchor"></i></a></li>-->
                     <li><a id="zoomToLine"><i class="fa fa-map"></i></a></li>
@@ -50,21 +51,22 @@
 
                     <ul>
                         <li>Find where you can setup your camera to shoot a sunset(or sunrise etc.) <a class="openpanel" href="#towards">
-                            behind a particular landmark or place</a> (the Eiffel Tower, Angel of the North, your town)
-                            on a <a class="openpanel" href="#when">date</a>.</li>
+                            behind a particular landmark or place</a> (the Eiffel Tower, Angel of the North, your town) on a <a class="openpanel" href="#when">date</a>.</li>
                         <li>Get an idea of the view from roads that cross that line using Google Street View.</li>
-                        <li data-issue="7">Get an idea of the scope of your possible shots by showing the "Field of View" of
-                            your <a class="openpanel" href="#camera">camera and lens</a> combo.</li>
-                        <li data-issue="9">See what you can shoot into a Sunset etc. <a class="openpanel" href="#from">from</a> 
-                            a position on a <a class="openpanel" href="#when">date</a>.</li>
-                        <li data-issue="">What Points of Interest are within your shot?</li>
-                        <li data-issue="17">What area you shot will encompass? Taking into account horizon and hills)</li>
+                        <li data-issue="7">Get an idea of the scope of your possible shots by showing the "Field of View" of your <a class="openpanel" href="#camera">camera and lens</a> combo.</li>
+                        <li data-issue="9">See what you can shoot into a Sunset etc. <a class="openpanel" href="#from">from</a> a position on a <a class="openpanel" href="#when">date</a>.</li>
+                        <!--
+                            <li data-issue="">What Points of Interest are within your shot?</li>
+                            <li data-issue="17">What area you shot will encompass? Taking into account horizon and hills)</li>
+                        -->
                         <li data-issue="13">Find out when you can get a Sunset / Sunrise Shot from
                             <a class="openpanel" href="#between">one spot to another</a>.</li>
                         <li>Landscape Timelapse Calculations
                             <ul>
-                                <li data-issue="24">What lense will you need to get the framing right for the Sun at the start of Sunrise to the end of golden hour etc.</li>
-                                <li data-issue="25">What interval you will need for how much video? for what time?</li>
+                                <li data-issue="25">What <a class="openpanel" href="#timelapse" >timelapse interval</a> you will need for how much video? for what time?</li>
+                                <!--
+                                     <li data-issue="24">What lense will you need to get the framing right for the Sun at the start of Sunrise to the end of golden hour etc.</li>
+                                -->
                             </ul>
                         </li>
                     </ul>
@@ -81,12 +83,12 @@
                         </li>
                         <li>Change the time of day and date in the calendar section below <i class="fa fa-calendar"></i></li>
                         <li>The green sections of the line should give you a decent veiw</li>
-                        
-                    <li>Click <i class="fa fa-street-view "></i> for a view towards the target, click that to open it in Google Street View</li>
-                        
+
+                        <li>Click <i class="fa fa-street-view "></i> for a view towards the target, click that to open it in Google Street View</li>
+
                     </ul>
                     <div class="linesummary"></div>
-                    
+
                 </div>
 
 
@@ -101,10 +103,10 @@
                         </li>
                         <li>Change the time of day and date in the calendar section below <i class="fa fa-calendar"></i></li>
                         <li>The green sections of the line should be visible from where the camera is set up.</li>
-                       
+
                     </ul>
                     <div class="linesummary"></div>
-                    
+
                 </div>
 
 
@@ -119,7 +121,7 @@
                         </li>
                         <li>The the camera and eye both need to been in green sections of the line to get a decent veiw</li>
                     </ul>
-                   <div id="betweensummary"></div>
+                    <div id="betweensummary"></div>
                     <div id="suntimes"></div>
 
                 </div>
@@ -192,6 +194,36 @@
                     </div>
                 </div>
 
+                <div class="leaflet-sidebar-pane" id="timelapse">
+                    <h1 class="leaflet-sidebar-header">Timelapse Calculations<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                    <p>
+                        Select the radio button to the right of the amount to are interested in calculating.
+                    </p>
+                    <div>
+                        <label>Interval between shots (secs)</label><input name="interval" type="number" min="1"/>
+                        <input type="radio" name="tl_calc" value="interval" />
+                    </div>
+                    <div>
+                        <label>Shooting Duration (mins)</label><input name="shoot_mins" type="number" min="1"   />
+                        <input type="radio" name="tl_calc" value="shoot_mins" />
+                    </div>
+                    <div>
+                        <label>Frames To Shoot</label><input name="frames" type="number" min="1"  />
+                    </div>
+
+                    <div>
+                        <label>Playback FPS 
+                        </label><input name="FPS" list="fpses" type="number" />
+                        
+                    </div>
+                    
+                
+                    
+                    <div>
+                        <label>Playback Duration (secs)</label><input name="play_secs" type="number" steps="0.1" />
+                        <input type="radio" name="tl_calc" value="play_secs" checked />
+                    </div>
+                </div>
 
 
                 <div class="leaflet-sidebar-pane" id="about">
@@ -211,6 +243,8 @@
                     </p>
 
                 </div>
+
+
 
                 <div class="leaflet-sidebar-pane" id="messages">
                     <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>

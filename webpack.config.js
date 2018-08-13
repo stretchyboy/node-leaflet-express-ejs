@@ -15,15 +15,15 @@ module.exports = {
         publicPath: '/dist'
     },
     plugins: [
-          //new HardSourceWebpackPlugin(),
-          new Dotenv(),
+        //new HardSourceWebpackPlugin(),
+        new Dotenv(),
         new MiniCssExtractPlugin({
             // Options similar to the same options in webpackOptions.output
             // both options are optional
             filename: "[name].css",
             chunkFilename: "[id].css"
         })
-  ],
+    ],
     module: {
         rules: [
             {
@@ -37,19 +37,35 @@ module.exports = {
                             outputPath: sOutputDir,
                             publicPath: '/'
                         }
-          },
-          "css-loader"
-        ]
-      },
-             {test: /\.ejs$/, use: ['ejs-compiled-loader']},
-            
-       /*{
-         test: /\.css$/,
-         use: [
-           'style-loader',
-           'css-loader'
-         ]
-       },*/
+                    },
+                    "css-loader"
+                ]
+            },
+            /*{
+                test: /\.ejs$/,
+                use: ['ejs-compiled-loader']
+            },*/
+            {
+                test: /\.ejs$/,
+                include: [
+                    path.resolve(__dirname, "src")
+                ],
+                loader: 'ejs-compiled-loader'
+            },
+            {
+                test: /\.ejs$/,
+                include: [
+                    path.resolve(__dirname, "views")
+                ],
+                loader: 'ejs-html-loader'
+            },
+            /*{
+                test: /\.css$/,
+                use: [
+                   'style-loader',
+                   'css-loader'
+                ]
+            },*/
             {
                 test: /\.(png|svg|jpg|gif)$/,
                 use: [
@@ -60,9 +76,9 @@ module.exports = {
                             outputPath: sOutputDir,
                             publicPath: '/dist'
                         }
-           }
-         ]
-       },
+                    }
+                ]
+            },
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
                 use: [{
@@ -74,6 +90,6 @@ module.exports = {
                     }
                 }]
             }
-     ]
+        ]
     }
 };
