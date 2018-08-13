@@ -234,8 +234,19 @@
 
                     <div>
                         <label>Playback FPS 
-                        </label><input name="FPS" list="fpses" type="number" />
-
+                        </label>
+                        <input name="FPS" list="fpses"  min="1" max="60" type="range" />
+                        <datalist id="fpses">
+                            <option value="1"></option>
+                            <option value="10"></option>
+                            <option value="12"></option>
+                            <option value="15"></option>
+                            <option value="24"></option>
+                            <option value="25"></option>
+                            <option value="30"></option>
+                            <option value="60"></option>
+                        </datalist>
+                        <input name="FPS"  type="number" min="1" max="60"/>
                     </div>
 
 
