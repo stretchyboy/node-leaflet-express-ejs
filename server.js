@@ -44,12 +44,14 @@ if (bLive) {
     app.use(require("webpack-hot-middleware")(compiler));
 
 }
-    
+
 app.use("/dist", express.static('dist'));
 
-
-
-// Get port from environment and store in Express
-var port = process.env.PORT || 3000;
-app.listen(port)
-console.log('Server is listening on port', port)
+if (require.main === module) {
+    // Get port from environment and store in Express
+    var port = process.env.PORT || 3000;
+    app.listen(port)
+    console.log('Server is listening on port', port)
+} else {
+    module.exports = app;
+}

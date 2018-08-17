@@ -102,6 +102,77 @@ if (bAuth) {
     });
 }
 
+
+
+var bStateDirty = true;
+var setDirty = function () {
+    bStateDirty = true;
+}
+
+var saveDB = new PouchDB('savedata');
+var defaultSave = {
+    _id: "current",
+    panel: "home",
+    timetype: "sunset",
+    interval: 5,
+    shoot_mins: 10,
+    frames: 120,
+    FPS: 15,
+    play_secs: 8
+};
+
+saveDB.get('current').catch(function (err) {
+        return saveDB.put(defaultSave)
+            .then(function () {
+                return saveDB.get('current');
+            });
+    })
+    .then(function (doc) {
+        console.log("current", doc);
+
+        doc = Object.assign(defaultSave, doc);
+        console.log("doc", doc);
+        createBind(doc);
+        sidebar.open(doc.panel);
+    });
+
+
+
+var oState = {};
+var createBind = function (oModel) {
+    oState = Bind(oModel, {
+        /**/
+        //timetype: 'select[name="timetype"]',
+        interval: {
+            "dom": 'input[name="interval"]',
+            "callback": setDirty
+        },
+        shoot_mins: {
+            "dom": 'input[name="shoot_mins"]',
+            "callback": setDirty
+        },
+        frames: {
+            "dom": 'input[name="frames"]',
+            "callback": setDirty
+        },
+        FPS: {
+            "dom": 'input[name="FPS"]',
+            "callback": setDirty
+        },
+        play_secs: {
+            "dom": 'input[name="play_secs"]',
+            "callback": setDirty
+        },
+        timetype: {
+            "dom": 'select[name="timetype"]',
+            //"callback": drawLine
+        },
+    });
+}
+
+
+
+
 //https://jjwtay.github.io/Leaflet.draw-box/ target box  drawing
 // TODOS
 // TODO : save plans
@@ -492,6 +563,9 @@ var _drawLine = function (sTimeType, sDate, sShootingDirection) {
     // TODO : Drawsunset as well
     var times = SunCalc.getTimes(oDate, target[0], target[1]);
     //nsole.log("times", times);
+    if (!times[sTimeType]) {
+        return
+    }
     jQuery("#time").html(times[sTimeType].toLocaleTimeString());
 
 
@@ -772,10 +846,12 @@ var renderSunTimes = function (aSunEvents) {
 }
 
 var drawLine = function () {
+    bStateDirty = true;
     if (sShootingDirection == "between") {
         return _drawBetween();
     }
-    var sTimeType = jQuery("#timetype").val();
+
+    var sTimeType = oState.timetype; //jQuery("#timetype").val();
     var sDate = jQuery("#timedate").val();
     return _drawLine(sTimeType, sDate, sShootingDirection);
 }
@@ -827,6 +903,9 @@ var setShootingDirection = function (dir) {
     if (dir == sShootingDirection) {
         return true;
     }
+    if (!oEye || !oEye.dragging || !oCamera || !oCamera.dragging) {
+        return;
+    }
     if (dir == "towards") {
         oEye.dragging.enable();
         oCamera.dragging.disable();
@@ -850,16 +929,14 @@ sidebar.on('content', function (e) {
     if (["towards", "from", "between"].includes(e.id)) {
         setShootingDirection(e.id)
     }
-
+    oState.panel = e.id;
+    bStateDirty = true;
 });
 
-jQuery("#timetype").on("change", function (evt) {
+/*jQuery("#timetype").on("change", function (evt) {
     drawLine();
-});
+});*/
 
-jQuery("#timedate").on("change", function (evt) {
-    drawLine();
-});
 
 jQuery("#cameras").on("change", function (evt) {
     drawLine();
@@ -892,60 +969,9 @@ jQuery("#zoomToLine").on("click", function () {
     });
 })
 
-var bTlDirty = true;
-var setDirty = function () {
-    bTlDirty = true;
-}
-
-var saveDB = new PouchDB('savedata');
-
-saveDB.get('current_timelapse').catch(function (err) {
-        return saveDB.put({
-            _id: "current_timelapse",
-            interval: 5,
-            shoot_mins: 10,
-            frames: 120,
-            FPS: 15,
-            play_secs: 8
-        }).then(function(){
-            return saveDB.get('current_timelapse');
-        });
-    })
-    .then(function(doc){
-        console.log("current_timelapse", doc);
-        createBind(doc);
-    });
-
-
-
-var timelapse = {};
-var createBind = function (oModel) {
-    timelapse = Bind(oModel, {
-        interval: {
-            "dom": 'input[name="interval"]',
-            "callback": setDirty
-        },
-        shoot_mins: {
-            "dom": 'input[name="shoot_mins"]',
-            "callback": setDirty
-        },
-        frames: {
-            "dom": 'input[name="frames"]',
-            "callback": setDirty
-        },
-        FPS: {
-            "dom": 'input[name="FPS"]',
-            "callback": setDirty
-        },
-        play_secs: {
-            "dom": 'input[name="play_secs"]',
-            "callback": setDirty
-        }
-    });
-}
 
 var tl_recalc = function () {
-    if (!bTlDirty) {
+    if (!bStateDirty) {
         return;
     }
     var calcID = jQuery('input[name="tl_calc"]:checked').val();
@@ -953,34 +979,37 @@ var tl_recalc = function () {
         case "FPS":
         case "play_secs":
 
-            timelapse.frames = Math.round(timelapse.shoot_mins * 60 / timelapse.interval);
+            oState.frames = Math.round(oState.shoot_mins * 60 / oState.interval);
             break;
         case "interval":
         case "shoot_mins":
-            timelapse.frames = Math.round(timelapse.FPS * timelapse.play_secs);
+            oState.frames = Math.round(oState.FPS * oState.play_secs);
             break;
     }
 
     switch (calcID) {
         case "interval":
-            timelapse.interval = Math, round((timelapse.shoot_mins * 60) / timelapse.frames);
+            oState.interval = Math, round((oState.shoot_mins * 60) / oState.frames);
             break;
         case "shoot_mins":
-            timelapse.shoot_mins = Math.ceil(timelapse.frames * timelapse.interval / 60);
+            oState.shoot_mins = Math.ceil(oState.frames * oState.interval / 60);
             break;
         case "FPS":
-            timelapse.FPS = Math.round(timelapse.frames / timelapse.play_secs);
+            oState.FPS = Math.round(oState.frames / oState.play_secs);
             break;
         case "play_secs":
-            timelapse.play_secs = Math.floor(timelapse.frames * 10 / timelapse.FPS) / 10;
+            oState.play_secs = Math.floor(oState.frames * 10 / oState.FPS) / 10;
             break;
     }
-    saveDB.put(timelapse.__export()).then(function(res){
-        timelapse._rev = res.rev;
-        console.log(res);
+    bStateDirty = false;
+
+    saveDB.put(oState.__export()).catch(function (err) {
+        bStateDirty = true;
+    }).then(function (res) {
+        oState._rev = res.rev;
     });
-    
-    bTlDirty = false;
+
+
 };
 
-setInterval(tl_recalc, 1000);
+setInterval(tl_recalc, 5000);
