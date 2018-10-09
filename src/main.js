@@ -165,8 +165,9 @@ var createBind = function (oModel) {
         },
         timetype: {
             "dom": 'select[name="timetype"]',
-            //"callback": drawLine
+            "callback": drawLine
         },
+        
     });
 }
 
