@@ -164,7 +164,7 @@
                     <div>
 
                         <label>On What Date?</label>
-                        <input id="timedate" type="date" />
+                        <input name="timedate" type="date" />
                         <p>
                             Time <span id="time"></span>
                         </p>
@@ -184,7 +184,7 @@
                     <div>
 
                         <label>Lens Focal Length (<span id="lensfl_val"></span>mm)</label>
-                        <input type="range" id="lensfl" name="focallength" list="LenseMaxes" max="600">
+                        <input type="range" id="lensfl" name="focallength" list="LenseMaxes" min="10" max="600">
                         <datalist id="LenseMaxes">
                             <option value="25">25mm</option>
                             <option value="35">35mm</option>

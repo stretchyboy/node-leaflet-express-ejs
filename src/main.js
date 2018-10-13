@@ -114,6 +114,7 @@ var defaultSave = {
     _id: "current",
     panel: "home",
     timetype: "sunset",
+    timedate:null,
     interval: 5,
     shoot_mins: 10,
     frames: 120,
@@ -140,9 +141,7 @@ saveDB.get('current').catch(function (err) {
 
 var oState = {};
 var createBind = function (oModel) {
-    oState = Bind(oModel, {
-        /**/
-        //timetype: 'select[name="timetype"]',
+    oState = Bind(oModel, {        
         interval: {
             "dom": 'input[name="interval"]',
             "callback": setDirty
@@ -165,6 +164,10 @@ var createBind = function (oModel) {
         },
         timetype: {
             "dom": 'select[name="timetype"]',
+            "callback": drawLine
+        },
+        timedate: {
+            "dom": 'input[name="timedate"]',
             "callback": drawLine
         },
         
@@ -852,8 +855,9 @@ var drawLine = function () {
         return _drawBetween();
     }
 
-    var sTimeType = oState.timetype; //jQuery("#timetype").val();
-    var sDate = jQuery("#timedate").val();
+    var sTimeType = oState.timetype; 
+    var sDate = oState.timedate; 
+    //var sDate = jQuery("#timedate").val();
     return _drawLine(sTimeType, sDate, sShootingDirection);
 }
 
@@ -933,11 +937,6 @@ sidebar.on('content', function (e) {
     oState.panel = e.id;
     bStateDirty = true;
 });
-
-/*jQuery("#timetype").on("change", function (evt) {
-    drawLine();
-});*/
-
 
 jQuery("#cameras").on("change", function (evt) {
     drawLine();
