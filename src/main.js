@@ -115,6 +115,9 @@ var defaultSave = {
     panel: "home",
     timetype: "sunset",
     timedate:null,
+    focallength:50,
+  cameraheight:1.7,
+  sensorsize:"22.2x14.8",
     interval: 5,
     shoot_mins: 10,
     frames: 120,
@@ -170,6 +173,20 @@ var createBind = function (oModel) {
             "dom": 'input[name="timedate"]',
             "callback": drawLine
         },
+        focallength: {
+            "dom": '.focallength',
+            "callback": drawLine
+        },
+        cameraheight: {
+            "dom": '.cameraheight',
+            "callback": drawLine
+        },
+        sensorsize: {
+            "dom": '.sensorsize',
+            "callback": drawLine
+        },
+      
+
         
     });
 }
@@ -205,12 +222,13 @@ function getCameraOpposite(sensorWidth, focalLength, distanceM) {
 
 //draw cone representing field of view 
 function drawCone(lFocus, lStart) {
-    var fl = jQuery("#lensfl").val();
+    var fl = oState.focallength ; //jQuery("#lensfl").val();
+    
     if (fl == "none") {
         return true;
     }
     var focalLength = fl * (1 / 1000);
-    var sensorSize = jQuery("#cameras").val()
+    var sensorSize = oState.sensorsize; //jQuery("#cameras").val()
     var senorDims = sensorSize.split("x");
     var sensorWidth = senorDims[0] * (1 / 1000);
 
@@ -398,8 +416,8 @@ function getPointsOnLine(map, aLine, steps) {
 }
 
 function getCameraHeight() {
-
-    return parseFloat(jQuery("#cameraheight").val());
+    return oState.cameraheight;
+    //return parseFloat(jQuery("#cameraheight").val());
 }
 
 function drawViewLine(map, oLayer, aLine, iSteps, iDistance, bViewFrom) {
@@ -942,11 +960,13 @@ jQuery("#cameras").on("change", function (evt) {
     drawLine();
 });
 
+/*
 jQuery("#lensfl").on("change", function (evt) {
 
-    jQuery("#lensfl_val").html(jQuery("#lensfl").val())
+    //jQuery("#lensfl_val").html(jQuery("#lensfl").val())
     drawLine();
 });
+*/
 
 jQuery("#shootingdirection").on("change", function (evt) {
     drawLine();

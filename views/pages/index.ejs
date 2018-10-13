@@ -178,13 +178,14 @@
                     </h1>
                     <div>
                         <label>Camera Height (m)</label>
-                        <input id="cameraheight" type="number" min="0" max="50" step="0.1" value="1.5" />
+                        <input class="cameraheight" type="number" min="0" max="50" step="0.1" />
 
                     </div>
                     <div>
 
-                        <label>Lens Focal Length (<span id="lensfl_val"></span>mm)</label>
-                        <input type="range" id="lensfl" name="focallength" list="LenseMaxes" min="10" max="600">
+                        <label>Lens Focal Length (mm)</label>
+                        <input class="focallength" type="number" min="10" max="600" /><br />
+                      <input type="range" id="lensfl" class="focallength" list="LenseMaxes" min="10" max="600">
                         <datalist id="LenseMaxes">
                             <option value="25">25mm</option>
                             <option value="35">35mm</option>
@@ -211,7 +212,7 @@
 
                     <div>
                         <label>Camera Sensor</label>
-                        <select id="cameras">
+                        <select id="cameras" class="sensorsize">
                             <option value="36x24">35mm Full Frame</option>
                             <option value="28.7x19"  >APS - H (Canon)</option>
                             <option value="22.2x14.8" selected >APS - C (Canon)</option>
