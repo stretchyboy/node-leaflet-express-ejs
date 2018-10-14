@@ -6,17 +6,11 @@ import SunCalc from "suncalc";
 import morgan from 'morgan';
 import LatLon from "mt-latlon";
 
-
 const spacetime = require('spacetime')
 const geo = require('spacetime-geo')
 const Bind = require("bind.js");
 //apply the plugin
 spacetime.extend(geo)
-/*
-import 'spacetime';
-import 'spacetime-geo'
-//apply the plugin
-spacetime.extend(spacetime-geo);*/
 
 //import proxy from 'express-http-proxy';
 
@@ -45,6 +39,99 @@ import "leaflet-sidebar-v2/css/leaflet-sidebar.css";
 import "leaflet-fontawesome-markers/L.Icon.FontAwesome.css";
 import "leaflet.locatecontrol/dist/L.Control.Locate.mapbox.css";
 import "leaflet-compass/dist/leaflet-compass.src.css";
+
+
+var bStateDirty = true;
+var setDirty = function () {
+    bStateDirty = true;
+}
+
+var saveDB = new PouchDB('savedata');
+var defaultSave = {
+    _id: "current",
+    panel: "home",
+    timetype: "sunset",
+    timedate:null,
+    focallength:50,
+    cameraheight:1.7,
+    sensorsize:"22.2x14.8",
+    interval: 5,
+    shoot_mins: 10,
+    frames: 120,
+    FPS: 15,
+    play_secs: 8,
+    eyeposlat:53.38298, //[53.38298, -1.46949]
+    eyeposlng:-1.46949,
+    cameraposlat:53.38298, //[53.38298, -1.46949]
+    cameraposlng:-1.46949,
+    shooting_direction : "towards"
+};
+
+saveDB.get('current').catch(function (err) {
+        return saveDB.put(defaultSave)
+            .then(function () {
+                return saveDB.get('current');
+            });
+    })
+    .then(function (doc) {
+        console.log("current", doc);
+
+        doc = Object.assign(defaultSave, doc);
+        console.log("doc", doc);
+        createBind(doc);
+        sidebar.open(doc.panel);
+    });
+
+var oState = {};
+var createBind = function (oModel) {
+    oState = Bind(oModel, {        
+        interval: {
+            "dom": 'input[name="interval"]',
+            "callback": setDirty
+        },
+        shoot_mins: {
+            "dom": 'input[name="shoot_mins"]',
+            "callback": setDirty
+        },
+        frames: {
+            "dom": 'input[name="frames"]',
+            "callback": setDirty
+        },
+        FPS: {
+            "dom": 'input[name="FPS"]',
+            "callback": setDirty
+        },
+        play_secs: {
+            "dom": 'input[name="play_secs"]',
+            "callback": setDirty
+        },
+        timetype: {
+            "dom": 'select[name="timetype"]',
+            "callback": drawLine
+        },
+        timedate: {
+            "dom": 'input[name="timedate"]',
+            "callback": drawLine
+        },
+        focallength: {
+            "dom": '.focallength',
+            "callback": drawLine
+        },
+        cameraheight: {
+            "dom": '.cameraheight',
+            "callback": drawLine
+        },
+        sensorsize: {
+            "dom": '.sensorsize',
+            "callback": drawLine
+        },
+      /*
+        eyepos: {
+            "dom": '.eyepos',
+            "callback": drawLine
+        },*/
+    });
+}
 
 
 
@@ -102,94 +189,6 @@ if (bAuth) {
     });
 }
 
-
-
-var bStateDirty = true;
-var setDirty = function () {
-    bStateDirty = true;
-}
-
-var saveDB = new PouchDB('savedata');
-var defaultSave = {
-    _id: "current",
-    panel: "home",
-    timetype: "sunset",
-    timedate:null,
-    focallength:50,
-  cameraheight:1.7,
-  sensorsize:"22.2x14.8",
-    interval: 5,
-    shoot_mins: 10,
-    frames: 120,
-    FPS: 15,
-    play_secs: 8
-};
-
-saveDB.get('current').catch(function (err) {
-        return saveDB.put(defaultSave)
-            .then(function () {
-                return saveDB.get('current');
-            });
-    })
-    .then(function (doc) {
-        console.log("current", doc);
-
-        doc = Object.assign(defaultSave, doc);
-        console.log("doc", doc);
-        createBind(doc);
-        sidebar.open(doc.panel);
-    });
-
-
-
-var oState = {};
-var createBind = function (oModel) {
-    oState = Bind(oModel, {        
-        interval: {
-            "dom": 'input[name="interval"]',
-            "callback": setDirty
-        },
-        shoot_mins: {
-            "dom": 'input[name="shoot_mins"]',
-            "callback": setDirty
-        },
-        frames: {
-            "dom": 'input[name="frames"]',
-            "callback": setDirty
-        },
-        FPS: {
-            "dom": 'input[name="FPS"]',
-            "callback": setDirty
-        },
-        play_secs: {
-            "dom": 'input[name="play_secs"]',
-            "callback": setDirty
-        },
-        timetype: {
-            "dom": 'select[name="timetype"]',
-            "callback": drawLine
-        },
-        timedate: {
-            "dom": 'input[name="timedate"]',
-            "callback": drawLine
-        },
-        focallength: {
-            "dom": '.focallength',
-            "callback": drawLine
-        },
-        cameraheight: {
-            "dom": '.cameraheight',
-            "callback": drawLine
-        },
-        sensorsize: {
-            "dom": '.sensorsize',
-            "callback": drawLine
-        },
-      
-
-        
-    });
-}
 
 
 
@@ -882,7 +881,12 @@ var drawLine = function () {
 jQuery("#timedate").val(new Date());
 
 setTimeout(function () {
-    oEye = L.marker(defaultLatLng, {
+    console.log("oState.eyepos",  [oState.eyeposlat, oState.eyeposlng]);
+    console.log("oState.timedate", oState.timedate);
+    defaultLatLng = [oState.eyeposlat, oState.eyeposlng];
+    
+    
+    oEye = L.marker([oState.eyeposlat, oState.eyeposlng], {
         draggable: true,
         zIndexOffset: 1100,
         icon: L.icon.fontAwesome({
@@ -894,13 +898,17 @@ setTimeout(function () {
     }).addTo(map);
 
     oEye.on("move", function (evt) {
+        //console.log("oEye.on evt", evt);
+        oState.eyeposlat = evt.latlng.lat;
+        oState.eyeposlng = evt.latlng.lng;
+      
         if (sShootingDirection == "from") {
             return true;
         }
         return drawLine();
     });
 
-    oCamera = L.marker(defaultLatLng, {
+    oCamera = L.marker([oState.cameraposlat, oState.cameraposlng], {
         draggable: false,
         zIndexOffset: 1000,
         icon: L.icon.fontAwesome({
@@ -911,6 +919,10 @@ setTimeout(function () {
     }).addTo(map);
 
     oCamera.on("move", function (evt) {
+        //console.log("oCamera.on evt", evt);
+        oState.cameraposlat = evt.latlng.lat;
+        oState.cameraposlng = evt.latlng.lng;
+        
         if (sShootingDirection == "towards") {
             return true;
         }
