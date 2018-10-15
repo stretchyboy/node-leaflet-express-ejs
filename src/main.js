@@ -884,8 +884,7 @@ setTimeout(function () {
     console.log("oState.eyepos",  [oState.eyeposlat, oState.eyeposlng]);
     console.log("oState.timedate", oState.timedate);
     defaultLatLng = [oState.eyeposlat, oState.eyeposlng];
-    
-    
+        
     oEye = L.marker([oState.eyeposlat, oState.eyeposlng], {
         draggable: true,
         zIndexOffset: 1100,
@@ -902,7 +901,7 @@ setTimeout(function () {
         oState.eyeposlat = evt.latlng.lat;
         oState.eyeposlng = evt.latlng.lng;
       
-        if (sShootingDirection == "from") {
+        if (oState.shooting_direction == "from") {
             return true;
         }
         return drawLine();
@@ -923,7 +922,7 @@ setTimeout(function () {
         oState.cameraposlat = evt.latlng.lat;
         oState.cameraposlng = evt.latlng.lng;
         
-        if (sShootingDirection == "towards") {
+        if (oState.shooting_direction == "towards") {
             return true;
         }
         return drawLine();
@@ -935,7 +934,7 @@ setTimeout(function () {
 }, 5000);
 
 var setShootingDirection = function (dir) {
-    if (dir == sShootingDirection) {
+    if (dir == oState.shooting_direction) {
         return true;
     }
     if (!oEye || !oEye.dragging || !oCamera || !oCamera.dragging) {
@@ -954,7 +953,7 @@ var setShootingDirection = function (dir) {
         oCamera.dragging.enable();
 
     }
-    sShootingDirection = dir;
+    oState.shooting_direction = dir;
     drawLine();
     var allTabs = jQuery("[role='tab']").removeClass("CurrentDirection");
     var aTab = jQuery("[role='tab'][href='#" + dir + "']").addClass("CurrentDirection");
