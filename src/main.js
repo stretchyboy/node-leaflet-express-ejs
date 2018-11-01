@@ -29,6 +29,19 @@ import "leaflet-compass/dist/leaflet-compass.src.js";
 import "leaflet-providers";
 const openGeocoder = require('node-open-geocoder');
 
+var debugged = {};
+function unbug(){
+  debugged = {};
+}
+function debugOnce(title, vars){
+  if(debugged[title]){
+    
+  } else {
+    console.log(title, vars);
+    debugged[title] = 1;
+  }
+}
+
 L.TileLayer.ColorPickerWMS = L.TileLayer.WMS.extend({
   options: {
     crossOrigin: "anonymous"
@@ -301,6 +314,19 @@ function getHeightAtPoint(point, RGBLayer) {
   return h;
 }
 
+var dtmOptions = {
+  "layers": "LIDAR-DTM-TSR-2M-ENGLAND-EA-WMS",
+  "format": "image/png"
+}
+var dtmLayer = L.tileLayer.colorPickerWMS('http://environment.data.gov.uk/ds/wms?SERVICE=WMS&INTERFACE=ENVIRONMENT&LC=4400000000000000000000000000000&', dtmOptions).addTo(map);
+
+var dsmOptions = {
+  "layers": "LIDAR-DSM-TSR-2M-ENGLAND-EA-WMS",
+  "format": "image/png"
+}
+//var dsmLayer = L.tileLayer.colorPickerWMS('http://environment.data.gov.uk/ds/wms?SERVICE=WMS&INTERFACE=ENVIRONMENT&LC=4400000000000000000000000000000&', dsmOptions).addTo(map);
+
+
 var RGB_Terrain = L.tileLayer.colorPicker(
   'https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1Ijoic3RyZXRjaHlib3kiLCJhIjoiY2pmN3lieDgyMWtpcjJybzQyMDM1MXJ2aiJ9.d3ZCRlRRBklHjvuhHGtmtQ', {
     maxZoom: 15,
@@ -317,19 +343,8 @@ var RGB_Terrain2 = L.tileLayer.colorPicker(
     opacity: 0.5
   });
 
-var dtmOptions = {
-  "layers": "LIDAR-DTM-TSR-2M-ENGLAND-EA-WMS",
-  "format": "image/png"
-}
-var dtmLayer = L.tileLayer.colorPickerWMS('http://environment.data.gov.uk/ds/wms?SERVICE=WMS&INTERFACE=ENVIRONMENT&LC=4400000000000000000000000000000&', dtmOptions).addTo(map);
-
-var dsmOptions = {
-  "layers": "LIDAR-DSM-TSR-2M-ENGLAND-EA-WMS",
-  "format": "image/png"
-}
-var dsmLayer = L.tileLayer.colorPickerWMS('http://environment.data.gov.uk/ds/wms?SERVICE=WMS&INTERFACE=ENVIRONMENT&LC=4400000000000000000000000000000&', dsmOptions).addTo(map);
-
 function getSurfaceHeightAtPoint(point) {
+
   var a = null;
   a = dtmLayer.getColor(point);
   var b = null;
@@ -341,13 +356,17 @@ function getSurfaceHeightAtPoint(point) {
 
 
   var h = NaN;
-  if (a !== null && a[0] + a[1] + a[2] < 255 * 3) {
-    h = Math.round((((a[2] * 256) + (a[1] * 16) + a[1]) * 0.001));
-    //h = Math.round((((a[2] * 256 * 256) + (a[1] * 256) + a[1]) * 0.0001));
-    console.log("getSurfaceHeightAtPoint", a, h, b, j);
+  if (a !== null) {
+    
+    if (a[0] + a[1] + a[2] < 255 * 3) {
+      h = Math.round((((a[2] * 256) + (a[1] * 16) + a[1]) * 0.001));
+      //h = Math.round((((a[2] * 256 * 256) + (a[1] * 256) + a[1]) * 0.0001));
+      debugOnce("getSurfaceHeightAtPoint", {"a":a, "h":h, "b":b, "j":j});
+    }
   }
-
 }
+
+
 
 
 /* http://leaflet-extras.github.io/leaflet-providers/preview/index.html */
@@ -383,11 +402,11 @@ var baseMaps = {
   "Stamen Terrain": StamenTerrain,
   "MtbMap": MtbMap,
   "OpenTopoMap": OpenTopoMap,
+  //"DSM": dsmLayer,
+  //"DTM": dtmLayer,
 };
 
 var overlayMaps = {
-  "DSM": dsmLayer,
-  "DTM": dtmLayer,
   "RGB Heightmap": RGB_Terrain2,
   "Clouds": clouds,
   "Wind": wind,
@@ -518,8 +537,6 @@ function drawViewLine(map, oLayer, aLine, iSteps, iDistance, bViewFrom) {
   return aPoints;
 }
 
-var bDebugOnce = false;
-
 function getViewFromLine(map, aLine, iSteps, iDistance) {
   var cameraHeight = getCameraHeight();
 
@@ -633,6 +650,7 @@ const VIEW_POSS = 1;
 const VIEW_YES = 2;
 
 var _drawLine = function (sTimeType, sDate) {
+  unbug();
   var oDate = new Date();
   if (sDate) {
     oDate = new Date(sDate);
@@ -966,7 +984,11 @@ setTimeout(function () {
     openGeocoder()
       .reverse(evt.latlng.lng, evt.latlng.lat)
       .end((err, res) => {
-        oState.eyename = res.display_name;
+        if (err) {
+          oState.eyename = "unknown";
+        } else {
+          oState.eyename = res.display_name;
+        }
       });
 
     if (oState.shooting_direction == "placing" || oState.shooting_direction == "from") {
@@ -995,7 +1017,11 @@ setTimeout(function () {
     openGeocoder()
       .reverse(evt.latlng.lng, evt.latlng.lat)
       .end((err, res) => {
-        oState.cameraname = res.display_name;
+        if (err) {
+          oState.cameraname = "unknown";
+        } else {
+          oState.cameraname = res.display_name;
+        }
       });
 
     if (oState.shooting_direction == "towards" || oState.shooting_direction == "placing") {
@@ -1057,28 +1083,6 @@ sidebar.on('content', function (e) {
   oState.panel = e.id;
   bStateDirty = true;
 });
-/*
-jQuery("#cameras").on("change", function (evt) {
-    drawLine();
-});
-
-
-jQuery("#lensfl").on("change", function (evt) {
-
-    //jQuery("#lensfl_val").html(jQuery("#lensfl").val())
-    drawLine();
-});
-
-
-jQuery("#shootingdirection").on("change", function (evt) {
-    drawLine();
-});
-
-jQuery("#cameraheight").on("change", function (evt) {
-    bDebugOnce = true;
-    drawLine();
-});
-*/
 
 jQuery(".openpanel").on("click", function (evt) {
   var panel = jQuery(evt.target).attr("href").replace("#", "")
